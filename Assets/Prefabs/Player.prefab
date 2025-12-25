@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8565410986073753743}
   - component: {fileID: 6997492910264182973}
   - component: {fileID: 5176916618668376504}
+  - component: {fileID: 4335580837894268077}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -52,8 +53,14 @@ MonoBehaviour:
   CinemachineCameraTarget: {fileID: 3381379925562085062}
   JumpTimeout: 0.5
   FallTimeout: 0.15
+  SprintSpeed: 5.335
+  MoveSpeed: 2
+  JumpHeight: 1.2
+  Gravity: -15
+  SpeedChangeRate: 10
   GroundedOffset: -0.14
   CameraAngleOverride: 0
+  RotationSmoothTime: 0.12
   TopClamp: 70
   BottomClamp: -30
   GroundLayers:
@@ -186,6 +193,31 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!143 &4335580837894268077
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896470810385792603}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3381379925562085062
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,7 +262,7 @@ GameObject:
   - component: {fileID: 1219475683744307698}
   - component: {fileID: 282797587686716210}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Eye
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
