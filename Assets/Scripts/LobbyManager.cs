@@ -13,13 +13,27 @@ using Unity.Services.Relay.Models;
 using System;
 public class LobbyManager : MonoBehaviour
 {
+    private Lobby joinedLobby;
     private Lobby hostLobby;
     public static LobbyManager Instance { get; private set; }
     private float heartbeatTimer;
+    private float updateTimer;
+    private string playerName;
+    
+    private bool hasJoinedRelay;
+
+    public event EventHandler<EventArgs> OnCreatLobby;
+    public event EventHandler<EventArgs> OnLeaveLobby;
+
     public event EventHandler<OnListLobbiesArgs> OnListLobbies;
     public class OnListLobbiesArgs : EventArgs
     {
         public List<Lobby> LobbyList;
+    }
+    public event EventHandler<OnPrintPlayerArgs> OnPrintPlayers;
+    public class OnPrintPlayerArgs : EventArgs
+    {
+        public Lobby lobby;
     }
     private void Awake()
     {
@@ -46,13 +60,50 @@ public class LobbyManager : MonoBehaviour
         // 這會自動產生一個臨時的玩家帳號 ID
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
         
+        playerName = $"Player {UnityEngine.Random.Range(10,99)}";
+        hasJoinedRelay = false;
     }
 
     private void Update()
     {
         HandleHeartbeat();
+        HandleLobbyPollForUpdate();
     }
 
+
+    
+    private async void HandleLobbyPollForUpdate()
+    {
+        if (joinedLobby != null)
+        {
+            updateTimer -= Time.deltaTime;
+            if (updateTimer <= 0f)
+            {
+                float updateTimreMax = 5f;
+                updateTimer = updateTimreMax;
+                
+                Lobby lobby = await LobbyService.Instance.GetLobbyAsync(joinedLobby.Id);
+                joinedLobby = lobby;
+                PrintPlayers(joinedLobby);
+            }
+            if (!IsHost())
+            {
+                if (joinedLobby.Data != null && joinedLobby.Data.ContainsKey("RelayJoinCode") && !hasJoinedRelay)
+                {
+                    hasJoinedRelay = true;
+
+                    string relayJoinCode = joinedLobby.Data["RelayJoinCode"].Value;
+
+                    Debug.Log("取得 Relay JoinCode: " + relayJoinCode);
+
+                    await RelayManager.Instance.JoinRelay(relayJoinCode);
+
+                    GameManager.Instance.StartGame(false);
+                }
+            }
+        }
+        
+    }
 
     // 房間開啟後一段時間就會關閉，因此需要定期發送心跳包以維持房間存活
     private async void HandleHeartbeat()
@@ -64,56 +115,59 @@ public class LobbyManager : MonoBehaviour
             {
                 float haertTimerMax = 15f;
                 heartbeatTimer = haertTimerMax;
-                await LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
-                
+                await LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);        
             }
         }
     }
-
-    //
-    public async void CreatLobby()
+    
+    public async void CreatLobby(int maxPlayers,string lobbyName)
     {
         try
         {
-            string lobbyname = "TestLobby";
-            int maxPlayers = 4;
+            if(lobbyName == null || lobbyName=="")
+                lobbyName = "Lobby";
             
-            // 設定私有大廳
             CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
             {
-                IsPrivate = false,                             
+                // 設定私有大廳
+                IsPrivate = false,         
+                Player = GetPlayer()
             };
 
-            Lobby lobby =await LobbyService.Instance.CreateLobbyAsync(lobbyname, maxPlayers, createLobbyOptions);
+            Lobby lobby =await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createLobbyOptions);
+            joinedLobby = lobby;
             hostLobby = lobby;
             Debug.Log("大廳已建立: " + lobby.Name + "大廳人數上限: "+ lobby.MaxPlayers + "Lobby ID: "+ lobby.Id + "Lobby Code: " + lobby.LobbyCode);
-            string relayJoinCode = await RelayManager.Instance.CreatRelay();
-
-            Debug.Log($"GetRelay Join Code: {relayJoinCode}");
-            // 更新 Lobby Data（關鍵）
-            await LobbyService.Instance.UpdateLobbyAsync(
-                hostLobby.Id,
-                new UpdateLobbyOptions
-                {
-                    Data = new Dictionary<string, DataObject>
-                    {
-                        {
-                            "RelayJoinCode",
-                            new DataObject(
-                                DataObject.VisibilityOptions.Public,
-                                relayJoinCode
-                            )
-                        }
-                    }
-                }
-            );
-            NetworkManager.Singleton.StartHost();
 
         }catch (LobbyServiceException e)
         {
             Debug.Log("建立大廳失敗: " + e);
         }
         
+    }
+
+    private async Task CreatRelayAndUpdateLobbyData()
+    {
+        string relayJoinCode = await RelayManager.Instance.CreatRelay();
+
+        Debug.Log($"GetRelay Join Code: {relayJoinCode}");
+        // 更新 Lobby Data
+        await LobbyService.Instance.UpdateLobbyAsync(
+            joinedLobby.Id,
+            new UpdateLobbyOptions
+            {
+                Data = new Dictionary<string, DataObject>
+                {
+                    {
+                        "RelayJoinCode",
+                        new DataObject(
+                            DataObject.VisibilityOptions.Public,
+                            relayJoinCode
+                        )
+                    }
+                }
+            }
+        );
     }
 
     public async void ListLobbies()
@@ -156,19 +210,13 @@ public class LobbyManager : MonoBehaviour
     {
         try
         {
-            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
-            await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id);
-            // await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+            JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
+            {
+                Player = GetPlayer()
+            };
+            joinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobby.Id,joinLobbyByIdOptions);
+
             Debug.Log("成功加入大廳 Lobby Id: " + lobby.Id);
-
-            string relayJoinCode =
-            lobby.Data["RelayJoinCode"].Value;
-
-            Debug.Log("取得 Relay JoinCode: " + relayJoinCode);
-
-            await RelayManager.Instance.JoinRelay(relayJoinCode);
-
-            NetworkManager.Singleton.StartClient();
 
         }catch (LobbyServiceException e)
         {
@@ -176,4 +224,101 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    
+    public void PrintPlayers(Lobby lobby)
+    {
+        foreach (Player player in lobby.Players)
+        {
+            Debug.Log(player.Data["PlayerName"].Value);
+        }
+        OnPrintPlayers.Invoke(this,new OnPrintPlayerArgs{lobby = lobby});
+    }
+
+    private Player GetPlayer()
+    {
+        return new Player
+                {
+                    Data = new Dictionary<string, PlayerDataObject>
+                    {
+                        {
+                            "PlayerName",
+                            new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member,playerName)
+                        }
+                    }
+                };                    
+    }
+    private void UpdatePlayerName(string newPlayerName)
+    {
+        try{
+            playerName = newPlayerName;
+            LobbyService.Instance.UpdatePlayerAsync(joinedLobby.Id,AuthenticationService.Instance.PlayerId,new UpdatePlayerOptions
+            {
+            Data = new Dictionary<string, PlayerDataObject>
+                        {
+                            {
+                                "PlayerName",
+                                new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member,playerName)
+                            }
+                        }
+            });
+        }
+        catch(LobbyServiceException e)
+        {
+            Debug.Log("更新Player Name 失敗: "+e);
+        }
+        
+    }
+
+    private void LeaveLobby()
+    {
+        try
+        {
+            LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id,AuthenticationService.Instance.PlayerId);
+            hostLobby = null;
+            joinedLobby = null;
+        }
+        catch(LobbyServiceException e)
+        {
+            Debug.Log("離開大廳失敗: "+e);
+        }
+    }
+    private void KickPlayer(Player player)
+    {
+        try
+        {
+            LobbyService.Instance.RemovePlayerAsync(joinedLobby.Id,player.Id);
+        }
+        catch(LobbyServiceException e)
+        {
+            Debug.Log("踢除玩家失敗: "+e);
+        }
+    }
+    bool IsHost()
+    {
+        return joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
+    }
+    public void CreatLobbyButtonClick(int maxPlayers,string lobbyName)
+    {
+        CreatLobby(maxPlayers,lobbyName);
+        OnCreatLobby.Invoke(this,EventArgs.Empty);
+    }
+    public void LeaveLobbyButtOnClick()
+    {
+        LeaveLobby();
+        OnLeaveLobby.Invoke(this,EventArgs.Empty);
+        PlayerListUI.Instance.Hide();
+    }
+    public void JoinLobby(Lobby lobby)
+    {
+        JoinLobbyById(lobby);
+        LobbyListUI.Instance.Hide();
+        PlayerListUI.Instance.Show();
+        PlayerListUI.Instance.HideStartButton();
+    }
+    public async void OnGameStart()
+    {
+        await CreatRelayAndUpdateLobbyData();
+        GameManager.Instance.StartGame(true);
+    }
+    
 }

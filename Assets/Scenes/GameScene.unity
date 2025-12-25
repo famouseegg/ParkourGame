@@ -386,7 +386,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 71201357}
-  - component: {fileID: 71201358}
   m_Layer: 5
   m_Name: LobbyUI
   m_TagString: Untagged
@@ -416,20 +415,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &71201358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71201356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b24ed1a39042c5840aaa61cc839c5f08, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LobbyUI
-  creatLobbyButton: {fileID: 1795101051}
-  listLobbysButton: {fileID: 1899085100}
 --- !u!1 &191845032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1665,8 +1650,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0397d1d2a7d506f47ae5cb211461ed77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyListUI
+  creatLobbyButton: {fileID: 1795101051}
+  listLobbysButton: {fileID: 1899085100}
   container: {fileID: 1798437142}
-  SingleLobbyTemplate: {fileID: 575908104}
+  SingleLobbyListTemplate: {fileID: 575908104}
 --- !u!1 &508894770
 GameObject:
   m_ObjectHideFlags: 0
@@ -1676,8 +1663,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 508894771}
+  - component: {fileID: 508894772}
   m_Layer: 5
-  m_Name: PlayerNameTemplet
+  m_Name: SinglePlayerNameListTempletUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1704,6 +1692,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &508894772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508894770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 386a50b445e30d24299798000f78f21d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SinglePlayerNameListTempletUI
+  PlayerText: {fileID: 191845034}
 --- !u!1 &519078238
 GameObject:
   m_ObjectHideFlags: 0
@@ -1713,6 +1714,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 519078239}
+  - component: {fileID: 519078240}
   m_Layer: 5
   m_Name: CreatLobbyUI
   m_TagString: Untagged
@@ -1745,6 +1747,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -5}
   m_SizeDelta: {x: -600, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &519078240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519078238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06aeccde0cc70f54e901cf1fcdfa3452, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CreatLobbyUI
+  inputField: {fileID: 1279737220}
+  maxtPlayerText: {fileID: 208053535}
+  changeMaxPlayerButton: {fileID: 934699271}
+  creatButton: {fileID: 60064204}
+  backButton: {fileID: 2104563828}
 --- !u!1 &575908103
 GameObject:
   m_ObjectHideFlags: 0
@@ -1756,7 +1775,7 @@ GameObject:
   - component: {fileID: 575908104}
   - component: {fileID: 575908105}
   m_Layer: 5
-  m_Name: SingleLobbyUITemplet
+  m_Name: SingleLobbyListTempletUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1834,7 +1853,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 121}
+  m_AnchoredPosition: {x: 0, y: 186}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &622410786
@@ -2717,7 +2736,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -203, y: 289}
+  m_AnchoredPosition: {x: -160, y: 50}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &977801337
@@ -3067,6 +3086,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1230007203}
+  - component: {fileID: 1230007204}
   m_Layer: 5
   m_Name: PlayerListUI
   m_TagString: Untagged
@@ -3095,9 +3115,25 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -2.3287964, y: -24.13617}
-  m_SizeDelta: {x: -632.762, y: -481.4474}
+  m_AnchoredPosition: {x: -2.3287354, y: -100.13489}
+  m_SizeDelta: {x: -632.762, y: -329.4499}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1230007204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230007202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8371e9163d20e4bb308bf92cf1b32c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerListUI
+  StartGameButton: {fileID: 977801337}
+  LeaveButton: {fileID: 1448919844}
+  container: {fileID: 622410785}
+  SinglePlayerNameListTemplate: {fileID: 508894771}
 --- !u!1 &1263034302
 GameObject:
   m_ObjectHideFlags: 0
@@ -3728,7 +3764,7 @@ GameObject:
   - component: {fileID: 1448919845}
   - component: {fileID: 1448919844}
   m_Layer: 5
-  m_Name: BackButton
+  m_Name: LeaveButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3750,7 +3786,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 125, y: -332}
+  m_AnchoredPosition: {x: 114, y: -72}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1448919844
