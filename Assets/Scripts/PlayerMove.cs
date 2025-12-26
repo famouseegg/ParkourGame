@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class PlayerMove : MonoBehaviour
 {
-    [SerializeField] private GameObject mainCamera;
+    
     [SerializeField] private GameObject CinemachineCameraTarget;
     [SerializeField] float JumpTimeout = 0.50f;
     [SerializeField] private float SprintSpeed = 5.335f;
@@ -19,12 +19,12 @@ public class PlayerMove : MonoBehaviour
     // 腳色旋轉速度
     [SerializeField] private float RotationSmoothTime = 0.12f;
 
+     // 地板圖層(什麼東西算地板)
+    [SerializeField] private LayerMask GroundLayers;
     // 視角最高最低限制
     public float TopClamp = 70.0f;
     public float BottomClamp = -30.0f;
-
-     // 地板圖層(什麼東西算地板)
-    [SerializeField] private LayerMask GroundLayers;
+    
     // 攝影機垂直旋轉限制
     public bool LockCameraPosition = false;
 
@@ -49,11 +49,14 @@ public class PlayerMove : MonoBehaviour
     private float targetRotation = 0.0f;
     private CharacterController controller;
     private StarterAssetsInputs input;
+    private GameObject mainCamera;
 
     // 閥值
     private const float THRESHOLD = 0.01f;
     private void Start()
     {
+        // 只有一個Camara時適用
+        mainCamera = Camera.main.gameObject;
         cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
         controller = GetComponent<CharacterController>();
         input = GetComponent<StarterAssetsInputs>();

@@ -1,13 +1,13 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
 public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
     
     // public event EventHandler OnGameStarted;
-
     private void Awake()
     {
         if(Instance != null)
@@ -18,7 +18,6 @@ public class GameManager : NetworkBehaviour
     public void StartGame(bool isHost)
     {
         LobbyUIController.Instance.ChangeUI(LobbyUIController.State.HideAll);
-
         var nm = NetworkManager.Singleton;
         if (!nm.IsClient && !nm.IsServer)
         {
@@ -29,5 +28,8 @@ public class GameManager : NetworkBehaviour
         }
         // OnGameStarted.Invoke(this,EventArgs.Empty);
     }
+    
+
+  
 }
 
