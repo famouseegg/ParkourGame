@@ -4,7 +4,7 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerListUI : MonoBehaviour
+public class PlayerListUI : LobbyUI
 {
     public static PlayerListUI Instance;
     [SerializeField] private Button StartGameButton;
@@ -26,19 +26,9 @@ public class PlayerListUI : MonoBehaviour
     {
         Hide();
         SinglePlayerNameListTemplate.gameObject.SetActive(false);
-        LobbyManager.Instance.OnCreatLobby +=LobbyManager_OnCreatLobbyButtonClick;
         LobbyManager.Instance.OnPrintPlayers += LobbyManager_OnPrintPlayers;
-        GameManager.Instance.OnGameStarted += GameManager_OnGameStarted;
         LeaveButton.onClick.AddListener(OnLeaveButtonClick);
         StartGameButton.onClick.AddListener(OnStarGameButtonClick);
-    }
-    private void LobbyManager_OnCreatLobbyButtonClick(object sender,EventArgs e)
-    {
-        Show();
-    }
-    private void GameManager_OnGameStarted(object sender,EventArgs e)
-    {
-        Hide();
     }
     private void LobbyManager_OnPrintPlayers(object sender,LobbyManager.OnPrintPlayerArgs e)
     {
@@ -63,21 +53,13 @@ public class PlayerListUI : MonoBehaviour
     private void OnLeaveButtonClick()
     {
         LobbyManager.Instance.LeaveLobbyButtOnClick();
+        LobbyUIController.Instance.ChangeUI(LobbyUIController.State.LobbyList);
     }
     private void OnStarGameButtonClick()
     {
-        Hide();
         LobbyManager.Instance.OnGameStart();
     }
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+    
     public void HideStartButton()
     {
         StartGameButton.gameObject.SetActive(false);

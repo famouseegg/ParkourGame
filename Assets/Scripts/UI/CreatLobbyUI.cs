@@ -4,9 +4,8 @@ using Unity.VisualScripting;
 using UnityEditor.Search;
 using UnityEngine;
 using UnityEngine.UI;
-public class CreatLobbyUI : MonoBehaviour
+public class CreatLobbyUI : LobbyUI
 {
-    public static CreatLobbyUI Instance;
     [SerializeField] private TMPro.TMP_InputField inputField;
     [SerializeField] private TMPro.TextMeshProUGUI maxtPlayerText;
     [SerializeField] private Button changeMaxPlayerButton;
@@ -16,18 +15,6 @@ public class CreatLobbyUI : MonoBehaviour
     private const int MAX_MaxPlayerNumber = 4;
     private const int MIN_MaxPlayerNumber = 1;
     private int maxPlayers;
-    private void Awake()
-    {
-        if(Instance != null)
-        {
-            Debug.LogWarning("多個 CreatLobbyUI 實例存在於場景中，僅保留一個實例。");
-            
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
     private void Start()
     {
         Hide();
@@ -41,7 +28,7 @@ public class CreatLobbyUI : MonoBehaviour
     private void OnCreatLobbyButtonClick()
     {
         LobbyManager.Instance.CreatLobbyButtonClick(maxPlayers,inputField.text);
-        Hide();
+        LobbyUIController.Instance.ChangeUI(LobbyUIController.State.PlayerList,true);
     }
     private void OnchangeMaxPlayerButtonClick()
     {
@@ -52,21 +39,10 @@ public class CreatLobbyUI : MonoBehaviour
     }
     private void OnBackButtonClick()
     {
-        LobbyListUI.Instance.Show();
-        Hide();
+        LobbyUIController.Instance.ChangeUI(LobbyUIController.State.LobbyList);
     }
     private void UpdateMaxPlayerText()
     {
         maxtPlayerText.text = $"Max Player : {maxPlayers}";
-    }
-    
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
     }
 }

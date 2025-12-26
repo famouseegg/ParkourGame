@@ -17,14 +17,11 @@ public class LobbyManager : MonoBehaviour
     private Lobby hostLobby;
     public static LobbyManager Instance { get; private set; }
     private float heartbeatTimer;
-    private float updateTimer;
+    private float updateLpbbyDataTimer;
+    private float updateListTimer;
     private string playerName;
     
     private bool hasJoinedRelay;
-
-    public event EventHandler<EventArgs> OnCreatLobby;
-    public event EventHandler<EventArgs> OnLeaveLobby;
-
     public event EventHandler<OnListLobbiesArgs> OnListLobbies;
     public class OnListLobbiesArgs : EventArgs
     {
@@ -68,6 +65,7 @@ public class LobbyManager : MonoBehaviour
     {
         HandleHeartbeat();
         HandleLobbyPollForUpdate();
+        UpdateLobbyList();
     }
 
 
@@ -76,11 +74,11 @@ public class LobbyManager : MonoBehaviour
     {
         if (joinedLobby != null)
         {
-            updateTimer -= Time.deltaTime;
-            if (updateTimer <= 0f)
+            updateLpbbyDataTimer -= Time.deltaTime;
+            if (updateLpbbyDataTimer <= 0f)
             {
                 float updateTimreMax = 5f;
-                updateTimer = updateTimreMax;
+                updateLpbbyDataTimer = updateTimreMax;
                 
                 Lobby lobby = await LobbyService.Instance.GetLobbyAsync(joinedLobby.Id);
                 joinedLobby = lobby;
@@ -88,8 +86,11 @@ public class LobbyManager : MonoBehaviour
             }
             if (!IsHost())
             {
-                if (joinedLobby.Data != null && joinedLobby.Data.ContainsKey("RelayJoinCode") && !hasJoinedRelay)
+                if (joinedLobby.Data != null && joinedLobby.Data.ContainsKey("RelayJoinCode") )
                 {
+                    if (hasJoinedRelay)
+                        return;
+
                     hasJoinedRelay = true;
 
                     string relayJoinCode = joinedLobby.Data["RelayJoinCode"].Value;
@@ -119,8 +120,22 @@ public class LobbyManager : MonoBehaviour
             }
         }
     }
+    private void UpdateLobbyList()
+    {
+        if(LobbyUIController.Instance.Getstate() == LobbyUIController.State.LobbyList)
+        {
+            updateListTimer -= Time.deltaTime;
+            if (updateListTimer <= 0f)
+            {
+                float updateListTimerMax = 5f;
+                updateListTimer = updateListTimerMax;
+                ListLobbies();
+            }
+        }
+            
+    }
     
-    public async void CreatLobby(int maxPlayers,string lobbyName)
+    private async void CreatLobby(int maxPlayers,string lobbyName)
     {
         try
         {
@@ -170,7 +185,7 @@ public class LobbyManager : MonoBehaviour
         );
     }
 
-    public async void ListLobbies()
+    private async void ListLobbies()
     {
         try
         {
@@ -206,7 +221,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    public async void JoinLobbyById(Lobby lobby)
+    private async void JoinLobbyById(Lobby lobby)
     {
         try
         {
@@ -225,7 +240,7 @@ public class LobbyManager : MonoBehaviour
     }
 
     
-    public void PrintPlayers(Lobby lobby)
+    private void PrintPlayers(Lobby lobby)
     {
         foreach (Player player in lobby.Players)
         {
@@ -293,27 +308,26 @@ public class LobbyManager : MonoBehaviour
             Debug.Log("踢除玩家失敗: "+e);
         }
     }
-    bool IsHost()
+    public bool IsHost()
     {
         return joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
     }
     public void CreatLobbyButtonClick(int maxPlayers,string lobbyName)
     {
         CreatLobby(maxPlayers,lobbyName);
-        OnCreatLobby.Invoke(this,EventArgs.Empty);
     }
     public void LeaveLobbyButtOnClick()
     {
         LeaveLobby();
-        OnLeaveLobby.Invoke(this,EventArgs.Empty);
-        PlayerListUI.Instance.Hide();
+        ListLobbies();
     }
-    public void JoinLobby(Lobby lobby)
+    public void JoinLobbyButtonOnClick(Lobby lobby)
     {
         JoinLobbyById(lobby);
-        LobbyListUI.Instance.Hide();
-        PlayerListUI.Instance.Show();
-        PlayerListUI.Instance.HideStartButton();
+    }
+    public void ListLobbyButtonOnClick()
+    {
+        ListLobbies();
     }
     public async void OnGameStart()
     {

@@ -5,7 +5,8 @@ using UnityEngine.Networking;
 public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
-    public event EventHandler OnGameStarted;
+    
+    // public event EventHandler OnGameStarted;
 
     private void Awake()
     {
@@ -16,12 +17,17 @@ public class GameManager : NetworkBehaviour
     }
     public void StartGame(bool isHost)
     {
-        if(isHost)
-            NetworkManager.Singleton.StartHost();
-        else
-            NetworkManager.Singleton.StartClient();
-                
-        OnGameStarted.Invoke(this,EventArgs.Empty);
+        LobbyUIController.Instance.ChangeUI(LobbyUIController.State.HideAll);
+
+        var nm = NetworkManager.Singleton;
+        if (!nm.IsClient && !nm.IsServer)
+        {
+            if(isHost)
+                NetworkManager.Singleton.StartHost();
+            else
+                NetworkManager.Singleton.StartClient();
+        }
+        // OnGameStarted.Invoke(this,EventArgs.Empty);
     }
 }
 

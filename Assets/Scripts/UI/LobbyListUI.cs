@@ -4,60 +4,34 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LobbyListUI : MonoBehaviour
+public class LobbyListUI : LobbyUI
 {
-    public static LobbyListUI Instance;
     [SerializeField] private Button creatLobbyButton;
     [SerializeField] private Button listLobbysButton;
     [SerializeField] private Transform container;
     [SerializeField] private Transform SingleLobbyListTemplate;
-    private void Awake()
-    {
-        if(Instance != null)
-        {
-            Debug.LogWarning("多個 LobbyListUI 實例存在於場景中，僅保留一個實例。");   
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
 
     private void Start()
     {
         SingleLobbyListTemplate.gameObject.SetActive(false);
         LobbyManager.Instance.OnListLobbies += LobbyManager_OnListLobbies;
-        LobbyManager.Instance.OnLeaveLobby += LobbyManager_OnLeaveLobby;
         creatLobbyButton.onClick.AddListener(OnCreateLobbyButtonClicked);
         listLobbysButton.onClick.AddListener(OnListLobbiesButtonClicked);   
         
     }
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
-
+    
     private void OnCreateLobbyButtonClicked()
     {
-        CreatLobbyUI.Instance.Show();
-        Hide();
+        LobbyUIController.Instance.ChangeUI(LobbyUIController.State.CreatLobbyUI);
     }
 
     private void OnListLobbiesButtonClicked()
     {
-        LobbyManager.Instance.ListLobbies();
+        LobbyManager.Instance.ListLobbyButtonOnClick();
     }
     private void LobbyManager_OnListLobbies(object sender, LobbyManager.OnListLobbiesArgs e)
     {
         UpdateVisuals(e.LobbyList);
-    }
-    private void LobbyManager_OnLeaveLobby(object sender, EventArgs e)
-    {
-        Show();
     }
     private void UpdateVisuals(List<Lobby> LobbyList)
     {
