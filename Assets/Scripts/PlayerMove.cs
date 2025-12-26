@@ -18,9 +18,11 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float CameraAngleOverride = 0.0f;
     // 腳色旋轉速度
     [SerializeField] private float RotationSmoothTime = 0.12f;
-
      // 地板圖層(什麼東西算地板)
     [SerializeField] private LayerMask GroundLayers;
+
+    // 確認玩家是否在地板上
+    [SerializeField] private bool Grounded = true;
     // 視角最高最低限制
     public float TopClamp = 70.0f;
     public float BottomClamp = -30.0f;
@@ -28,8 +30,7 @@ public class PlayerMove : MonoBehaviour
     // 攝影機垂直旋轉限制
     public bool LockCameraPosition = false;
 
-    // 確認玩家是否在地板上
-    private bool Grounded = true;
+    
     // 地板檢測半徑
     public float GroundedRadius = 0.28f;
     //水平方向旋轉角（左右轉）
@@ -43,7 +44,6 @@ public class PlayerMove : MonoBehaviour
     //追蹤下落角度
     private float verticalVelocity;
     private float jumpTimeoutDelta;
-    private float fallTimeoutDelta;
     //最大掉落速度
     private float terminalVelocity = 53.0f;
     private float targetRotation = 0.0f;

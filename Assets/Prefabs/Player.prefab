@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 5176916618668376504}
   - component: {fileID: 4335580837894268077}
   - component: {fileID: 8313000484154749620}
-  - component: {fileID: 7169296300328999317}
   - component: {fileID: 4694997680722912904}
+  - component: {fileID: -5259623683428703722}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -65,6 +65,7 @@ MonoBehaviour:
   GroundLayers:
     serializedVersion: 2
     m_Bits: 64
+  Grounded: 1
   TopClamp: 70
   BottomClamp: -30
   LockCameraPosition: 0
@@ -244,22 +245,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &7169296300328999317
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1896470810385792603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c5cb786b1c1ce047a33e44b482369aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ClientPlayerMove
-  ShowTopMostFoldoutHeaderGroup: 1
-  playerInput: {fileID: 5176916618668376504}
-  starterAssetsInputs: {fileID: 6997492910264182973}
-  playerMove: {fileID: 8565410986073753743}
 --- !u!114 &4694997680722912904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -284,7 +269,7 @@ MonoBehaviour:
   RotationMaxInterpolationTime: 0.1
   ScaleLerpSmoothing: 1
   ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
+  AuthorityMode: 1
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
@@ -306,6 +291,22 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &-5259623683428703722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896470810385792603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be58e2afbcad45469a013da07c0043a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClientAuthoritativePlayer
+  ShowTopMostFoldoutHeaderGroup: 1
+  playerInput: {fileID: 5176916618668376504}
+  starterInputs: {fileID: 6997492910264182973}
+  playerMove: {fileID: 8565410986073753743}
 --- !u!1 &3381379925562085062
 GameObject:
   m_ObjectHideFlags: 0
