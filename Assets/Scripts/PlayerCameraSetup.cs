@@ -15,7 +15,6 @@ public class PlayerCameraSetup : NetworkBehaviour
         if (cam != null)
         {
             cam.Follow = cameraTarget;
-            cam.LookAt = cameraTarget;
         }
         else
         {

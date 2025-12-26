@@ -19,6 +19,7 @@ public class ClientAuthoritativePlayer : NetworkBehaviour
         if (IsOwner)
         {
             EnableLocalPlayer();
+            Debug.Log("enable");
         }
         else
         {
