@@ -334,5 +334,8 @@ public class LobbyManager : MonoBehaviour
         await CreatRelayAndUpdateLobbyData();
         GameManager.Instance.StartGame(true);
     }
-    
+    public string GetPlayerName()
+    {
+        return playerName;
+    }
 }

@@ -426,6 +426,7 @@ MonoBehaviour:
   playerInput: {fileID: 5176916618668376504}
   starterInputs: {fileID: 6997492910264182973}
   playerMove: {fileID: 8565410986073753743}
+  playerNameText: {fileID: 7417851319055247220}
 --- !u!114 &1203919265590465887
 MonoBehaviour:
   m_ObjectHideFlags: 0
