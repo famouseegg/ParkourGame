@@ -172,7 +172,7 @@ public class PlayerMove : MonoBehaviour
             // 玩家有按跳躍鍵 & 跳躍冷卻時間已結束
             if (input.jump && jumpTimeoutDelta <= 0.0f)
             {
-                // 下落速度攻式 v = sqrt(h*-2*g)
+                // 下落速度攻式 v = sqrt(h*-2*g) 
                 verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
             
             }
@@ -213,5 +213,13 @@ public class PlayerMove : MonoBehaviour
             );
             Gizmos.DrawWireSphere(spherePosition, GroundedRadius);
         }
+    }
+    public void Launch(float launchVelocity)
+    {
+        // 向上的初速
+        verticalVelocity = launchVelocity;
+
+        // 重置跳躍冷卻，避免跳板後馬上被判定 grounded
+        jumpTimeoutDelta = JumpTimeout;
     }
 }
