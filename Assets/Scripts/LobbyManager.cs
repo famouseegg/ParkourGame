@@ -312,8 +312,10 @@ public class LobbyManager : MonoBehaviour
     {
         return joinedLobby.HostId == AuthenticationService.Instance.PlayerId;
     }
-    public void CreatLobbyButtonClick(int maxPlayers,string lobbyName)
+    public void CreatLobbyButtonClick(int maxPlayers,string lobbyName,string playerName)
     {
+        if(playerName!=""||playerName!=null)
+            this.playerName = playerName;
         CreatLobby(maxPlayers,lobbyName);
     }
     public void LeaveLobbyButtOnClick()
@@ -321,8 +323,10 @@ public class LobbyManager : MonoBehaviour
         LeaveLobby();
         ListLobbies();
     }
-    public void JoinLobbyButtonOnClick(Lobby lobby)
+    public void JoinLobbyButtonOnClick(Lobby lobby,String playerName)
     {
+        if(playerName!=""||playerName!=null)
+            this.playerName = playerName;
         JoinLobbyById(lobby);
     }
     public void ListLobbyButtonOnClick()

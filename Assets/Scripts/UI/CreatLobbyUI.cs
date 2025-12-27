@@ -12,6 +12,8 @@ public class CreatLobbyUI : LobbyUI
     [SerializeField] private Button creatButton;
     [SerializeField] private Button backButton;
 
+    [SerializeField] private TMPro.TMP_InputField playerNameInputField;
+
     private const int MAX_MaxPlayerNumber = 4;
     private const int MIN_MaxPlayerNumber = 1;
     private int maxPlayers;
@@ -27,7 +29,7 @@ public class CreatLobbyUI : LobbyUI
     }
     private void OnCreatLobbyButtonClick()
     {
-        LobbyManager.Instance.CreatLobbyButtonClick(maxPlayers,inputField.text);
+        LobbyManager.Instance.CreatLobbyButtonClick(maxPlayers,inputField.text,playerNameInputField.text);
         LobbyUIController.Instance.ChangeUI(LobbyUIController.State.PlayerList,true);
     }
     private void OnchangeMaxPlayerButtonClick()

@@ -5,6 +5,7 @@ public class SingleLobbyListTempletUI : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI lobbyNameText;
     [SerializeField] private TMPro.TextMeshProUGUI playersText;
     [SerializeField] private UnityEngine.UI.Button joinLobbyButton;
+    [SerializeField] private TMPro.TMP_InputField playerNameInputField;
     private Lobby lobby;
     public void UpdateVisuals(Lobby lobby)
     {
@@ -15,7 +16,7 @@ public class SingleLobbyListTempletUI : MonoBehaviour
     }
     private void JoinLobbyButtonOnClick()
     {
-        LobbyManager.Instance.JoinLobbyButtonOnClick(lobby);
+        LobbyManager.Instance.JoinLobbyButtonOnClick(lobby,playerNameInputField.text);
         LobbyUIController.Instance.ChangeUI(LobbyUIController.State.PlayerList,false);
     }
 }

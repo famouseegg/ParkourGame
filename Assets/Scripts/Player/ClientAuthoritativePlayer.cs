@@ -13,6 +13,7 @@ public class ClientAuthoritativePlayer : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI playerNameText;
 
     // 玩家名字（由 Server 寫，Everyone 讀）
+    // NGO 不能用 string
     private NetworkVariable<FixedString32Bytes> playerName =
         new NetworkVariable<FixedString32Bytes>(
             default,
