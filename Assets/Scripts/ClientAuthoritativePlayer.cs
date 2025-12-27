@@ -9,10 +9,7 @@ public class ClientAuthoritativePlayer : NetworkBehaviour
     [SerializeField] private StarterAssetsInputs starterInputs;
     [SerializeField] private PlayerMove playerMove;
 
-    private void Awake()
-    {
-        DisableAll();
-    }
+  
 
     public override void OnNetworkSpawn()
     {
