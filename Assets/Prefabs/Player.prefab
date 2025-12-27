@@ -218,10 +218,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   CinemachineCameraTarget: {fileID: 3381379925562085062}
-  JumpTimeout: 0.5
-  SprintSpeed: 5.335
-  MoveSpeed: 2
-  JumpHeight: 1.2
+  JumpTimeout: 0.1
+  SprintSpeed: 10
+  MoveSpeed: 4
+  JumpHeight: 2
   Gravity: -15
   SpeedChangeRate: 10
   GroundedOffset: -0.14

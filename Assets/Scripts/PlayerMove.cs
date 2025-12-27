@@ -5,10 +5,10 @@ public class PlayerMove : MonoBehaviour
 {
     
     [SerializeField] private GameObject CinemachineCameraTarget;
-    [SerializeField] float JumpTimeout = 0.50f;
-    [SerializeField] private float SprintSpeed = 5.335f;
-    [SerializeField] private float MoveSpeed = 2.0f;
-    [SerializeField] private float JumpHeight = 1.2f;
+    [SerializeField] float JumpTimeout = 0.10f;
+    [SerializeField] private float SprintSpeed = 20f;
+    [SerializeField] private float MoveSpeed = 4.0f;
+    [SerializeField] private float JumpHeight = 2.0f;
     // 重力
     [SerializeField] private float Gravity = -15.0f;
     // 加速&減速
