@@ -222,4 +222,21 @@ public class PlayerMove : MonoBehaviour
         // 重置跳躍冷卻，避免跳板後馬上被判定 grounded
         jumpTimeoutDelta = JumpTimeout;
     }
+    public void Knockback(Vector3 force)
+    {
+        // 水平推力
+        Vector3 horizontal = new Vector3(force.x, 0f, force.z);
+        controller.Move(horizontal * Time.deltaTime);
+
+        // 垂直擊飛
+        if (force.y > 0)
+        {
+            //給定向上速度
+            verticalVelocity = force.y;
+        }
+
+        // 強制進入空中狀態
+        jumpTimeoutDelta = JumpTimeout;
+    }
+
 }
