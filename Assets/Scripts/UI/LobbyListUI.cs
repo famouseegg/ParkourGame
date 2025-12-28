@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +10,6 @@ public class LobbyListUI : LobbyUI
     [SerializeField] private Button listLobbysButton;
     [SerializeField] private Transform container;
     [SerializeField] private Transform SingleLobbyListTemplate;
-    [SerializeField] private TMPro.TMP_InputField playerNameInputField;
 
     private void Start()
     {

@@ -8,8 +8,9 @@ public class RotatingBarPush : NetworkBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        Debug.Log("RotatingBarPush hit: " + hit.collider.name);
         if (!IsServer) return;
-
+        
         PlayerMove player = hit.collider.GetComponent<PlayerMove>();
         //避免撞到其他物件
 
