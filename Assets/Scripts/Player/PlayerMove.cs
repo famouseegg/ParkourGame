@@ -132,7 +132,8 @@ public class PlayerMove : MonoBehaviour
     {
         if (isKnockback)
         {
-            controller.Move(externalVelocity * Time.deltaTime+new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+            controller.Move(externalVelocity * Time.deltaTime 
+                            + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
 
             // 水平擊退逐漸衰減
             externalVelocity = Vector3.Lerp(
