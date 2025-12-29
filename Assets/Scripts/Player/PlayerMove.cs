@@ -5,34 +5,52 @@ public class PlayerMove : MonoBehaviour
 {
     
     [SerializeField] private GameObject CinemachineCameraTarget;
-    [SerializeField] float JumpTimeout = 0.10f;
+
+    /* ========== 移動參數 ========== */
     [SerializeField] private float SprintSpeed = 20f;
     [SerializeField] private float MoveSpeed = 4.0f;
-    [SerializeField] private float JumpHeight = 2.0f;
-    // 重力
-    [SerializeField] private float Gravity = -15.0f;
     // 加速&減速
     [SerializeField] private float SpeedChangeRate = 10.0f;
+
+
+    /* ========== 跳躍與重力參數 ========== */
+    [SerializeField] private float JumpHeight = 2.0f;
+    [SerializeField] private float JumpTimeout = 0.10f;
+    // 重力
+    [SerializeField] private float Gravity = -15.0f;
+    // 離地高度補正
     [SerializeField] private float GroundedOffset = 0.9f;
-    // 攝影機角度補正
+     // 地板圖層(什麼東西算地板)
+    [SerializeField] private LayerMask GroundLayers;
+    // 確認玩家是否在地板上
+    [SerializeField] private bool Grounded = true;
+      // 地板檢測半徑
+     [SerializeField] private float GroundedRadius = 0.28f;
+
+    /* ========== 攝影機與旋轉角度參數 ========== */
+
+     // 攝影機角度補正
     [SerializeField] private float CameraAngleOverride = 0.0f;
     // 腳色旋轉速度
     [SerializeField] private float RotationSmoothTime = 0.12f;
-     // 地板圖層(什麼東西算地板)
-    [SerializeField] private LayerMask GroundLayers;
-
-    // 確認玩家是否在地板上
-    [SerializeField] private bool Grounded = true;
     // 視角最高最低限制
-    public float TopClamp = 70.0f;
-    public float BottomClamp = -30.0f;
+    [SerializeField] private float TopClamp = 70.0f;
+    [SerializeField] private float BottomClamp = -30.0f;
     
     // 攝影機垂直旋轉限制
-    public bool LockCameraPosition = false;
+    [SerializeField] private bool LockCameraPosition = false;
+    
+    /* ========== 外力參數 ========== */
+    
+    //擊退衰減速度
+    [SerializeField] private float Damping = 6f;
+    // 外力影響
+    private Vector3 externalVelocity;
+    // 是否正在被擊退
+    private bool isKnockback;
 
     
-    // 地板檢測半徑
-    public float GroundedRadius = 0.28f;
+
     //水平方向旋轉角（左右轉）
     private float cinemachineTargetPitch;
     // 垂直方向旋轉角（上下看）
@@ -112,6 +130,28 @@ public class PlayerMove : MonoBehaviour
 
     private void Move()
     {
+        if (isKnockback)
+        {
+            controller.Move(externalVelocity * Time.deltaTime+new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+
+            // 水平擊退逐漸衰減
+            externalVelocity = Vector3.Lerp(
+                externalVelocity,
+                Vector3.zero,
+                Time.deltaTime * Damping
+            );
+
+            // 接近 0 時結束擊退
+            if (externalVelocity.magnitude < 0.1f)
+            {
+                externalVelocity = Vector3.zero;
+                isKnockback = false;
+            }
+
+            // 擊退時無法移動    
+            return;
+        }
+
         float targetSpeed = input.sprint ? SprintSpeed : MoveSpeed;
 
         if (input.move == Vector2.zero) targetSpeed = 0.0f;
@@ -224,19 +264,11 @@ public class PlayerMove : MonoBehaviour
     }
     public void Knockback(Vector3 force)
     {
-        // 水平推力
-        Vector3 horizontal = new Vector3(force.x, 0f, force.z);
-        controller.Move(horizontal * Time.deltaTime);
+        externalVelocity = force;
+        isKnockback = true;
 
         // 垂直擊飛
-        if (force.y > 0)
-        {
-            //給定向上速度
-            verticalVelocity = force.y;
-        }
-
-        // 強制進入空中狀態
-        jumpTimeoutDelta = JumpTimeout;
+        Launch(force.y);
     }
 
 }
