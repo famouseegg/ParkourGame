@@ -252,15 +252,15 @@ public class LobbyManager : MonoBehaviour
     private Player GetPlayer()
     {
         return new Player
+        {
+            Data = new Dictionary<string, PlayerDataObject>
+            {
                 {
-                    Data = new Dictionary<string, PlayerDataObject>
-                    {
-                        {
-                            "PlayerName",
-                            new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member,playerName)
-                        }
-                    }
-                };                    
+                    "PlayerName",
+                    new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member,playerName)
+                }
+            }
+        };                    
     }
     private void UpdatePlayerName(string newPlayerName)
     {
@@ -269,12 +269,12 @@ public class LobbyManager : MonoBehaviour
             LobbyService.Instance.UpdatePlayerAsync(joinedLobby.Id,AuthenticationService.Instance.PlayerId,new UpdatePlayerOptions
             {
             Data = new Dictionary<string, PlayerDataObject>
-                        {
-                            {
-                                "PlayerName",
-                                new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member,playerName)
-                            }
-                        }
+                {
+                    {
+                        "PlayerName",
+                        new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member,playerName)
+                    }
+                }
             });
         }
         catch(LobbyServiceException e)
@@ -314,7 +314,7 @@ public class LobbyManager : MonoBehaviour
     }
     public void CreatLobbyButtonClick(int maxPlayers,string lobbyName,string playerName)
     {
-        if(playerName!=""||playerName!=null)
+        if(playerName!="" && playerName!=null)
             this.playerName = playerName;
         CreatLobby(maxPlayers,lobbyName);
     }
@@ -325,7 +325,7 @@ public class LobbyManager : MonoBehaviour
     }
     public void JoinLobbyButtonOnClick(Lobby lobby,String playerName)
     {
-        if(playerName!=""||playerName!=null)
+        if(playerName!="" && playerName!=null)
             this.playerName = playerName;
         JoinLobbyById(lobby);
     }

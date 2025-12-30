@@ -9,12 +9,12 @@ public class Respawn : NetworkBehaviour
     [SerializeField] private float fallThreshold = -15.0f;
     private CharacterController controller;
 
-    private Transform spawnPoint;
+    private Vector3 spawnPoint;
     public override void OnNetworkSpawn()
     {
         if(!IsOwner)return;
 
-        spawnPoint = DefaulReSpawnPoint.Instance.GetTransform();
+        spawnPoint = DefaulReSpawnPoint.Instance.GetTransform().position;
         controller = this.GetComponent<CharacterController>();
     }
     private void Update()
@@ -30,12 +30,17 @@ public class Respawn : NetworkBehaviour
         //Charactor controller 會影響傳送須暫時關閉
         controller.enabled = false;
 
-        networkTransform.Teleport(spawnPoint.position, spawnPoint.rotation, transform.localScale);
+        networkTransform.Teleport(spawnPoint, transform.rotation, transform.localScale);
 
         controller.enabled = true;
     }
-    public void SetSpawnPoint(Transform transform)
+
+    [ClientRpc]
+    public void SetSpawnPointClientRpc(
+        Vector3 position,
+        ClientRpcParams rpcParams = default)
     {
-        spawnPoint=transform;
+        if (!IsOwner) return;
+        spawnPoint = position;
     }
 }

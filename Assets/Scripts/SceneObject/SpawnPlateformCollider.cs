@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class SpawnPlateformCollider : MonoBehaviour
+public class SpawnPlateformCollider : NetworkBehaviour
 {
     [SerializeField] private LayerMask playerMask;
 
@@ -8,7 +9,20 @@ public class SpawnPlateformCollider : MonoBehaviour
     {
         if((1<<other.gameObject.layer & playerMask) != 0)
         {
-            other.gameObject.GetComponent<Respawn>().SetSpawnPoint(transform);
+            
+           var respawn = other.GetComponent<Respawn>();
+            if (respawn == null) return;
+
+            respawn.SetSpawnPointClientRpc(
+                transform.position,
+                new ClientRpcParams
+                {
+                    Send = new ClientRpcSendParams
+                    {
+                        TargetClientIds = new[] { respawn.OwnerClientId }
+                    }
+                }
+            );
         }
     }
 }
