@@ -2,15 +2,11 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-public class RotatingBarPush : NetworkBehaviour
+public class RotatingBarPushCollider : NetworkBehaviour
 {
     [SerializeField] private float pushForce = 24f;
     [SerializeField] private float upwardForce = 6f;
-
     [SerializeField] private LayerMask playerMask;
-
-    [SerializeField] private Transform colliderCenter;
-
     private void OnTriggerEnter(Collider other)
     {
         if (!IsServer) return;
@@ -22,7 +18,7 @@ public class RotatingBarPush : NetworkBehaviour
             if (player == null) return;
 
             // 推開方向（由長條指向玩家）
-            Vector3 pushDir = (other.gameObject.transform.position - colliderCenter.position).normalized;
+            Vector3 pushDir = (other.gameObject.transform.position - transform.position).normalized;
 
             Vector3 force = pushDir * pushForce;
 

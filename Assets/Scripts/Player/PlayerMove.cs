@@ -272,19 +272,16 @@ public class PlayerMove : NetworkBehaviour
         // 重置跳躍冷卻，避免跳板後馬上被判定 grounded
         jumpTimeoutDelta = JumpTimeout;
     }
-    public void Knockback(Vector3 force)
+    
+    [ClientRpc]
+    public void ApplyKnockbackClientRpc(Vector3 force)
     {
+        if (!IsOwner) return;
         externalVelocity = force;
         isKnockback = true;
 
         // 垂直擊飛
         Launch(force.y);
-    }
-    [ClientRpc]
-    public void ApplyKnockbackClientRpc(Vector3 force)
-    {
-        if (!IsOwner) return;
-        Knockback(force);
     }
 
     [ClientRpc]
