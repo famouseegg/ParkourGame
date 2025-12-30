@@ -7,7 +7,7 @@ public class MovingPlatform : NetworkBehaviour
     [Header("Start position")]
     [SerializeField] private GameObject PointA;
     [SerializeField] private GameObject PointB;
-    [SerializeField] private GameObject platform;
+    [SerializeField] private GameObject platformParent;
     [SerializeField] private float speed=10f;
     [SerializeField] private float delay=1f;
 
@@ -16,7 +16,7 @@ public class MovingPlatform : NetworkBehaviour
     {
         if(!IsServer)
             return;
-        platform.transform.position = PointA.transform.position;
+        platformParent.transform.position = PointA.transform.position;
         targetPosit = PointB.transform.position;
         //模擬非同步
         StartCoroutine(MovePlateform());
@@ -26,9 +26,9 @@ public class MovingPlatform : NetworkBehaviour
     {
         while (true)
         {
-            while ((targetPosit - platform.transform.position).sqrMagnitude > 0.01f)
+            while ((targetPosit - platformParent.transform.position).sqrMagnitude > 0.01f)
             {
-                platform.transform.position = Vector3.MoveTowards(platform.transform.position
+                platformParent.transform.position = Vector3.MoveTowards(platformParent.transform.position
                     ,targetPosit,speed*Time.deltaTime);
                     yield return null;
             }
