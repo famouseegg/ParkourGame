@@ -30,7 +30,7 @@ public class RotatingBarPush : NetworkBehaviour
             //純水平推容易卡地板
             force.y = upwardForce;
 
-            player.Knockback(force);
+            player.ApplyKnockbackClientRpc(force);
         }
         
     }

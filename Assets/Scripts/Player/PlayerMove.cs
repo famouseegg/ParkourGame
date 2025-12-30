@@ -1,7 +1,8 @@
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : NetworkBehaviour
 {
     
     [SerializeField] private GameObject CinemachineCameraTarget;
@@ -270,6 +271,12 @@ public class PlayerMove : MonoBehaviour
 
         // 垂直擊飛
         Launch(force.y);
+    }
+    [ClientRpc]
+    public void ApplyKnockbackClientRpc(Vector3 force)
+    {
+        if (!IsOwner) return;
+        Knockback(force);
     }
 
 }
