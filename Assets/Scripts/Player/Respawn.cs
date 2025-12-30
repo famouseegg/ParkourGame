@@ -36,9 +36,7 @@ public class Respawn : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void SetSpawnPointClientRpc(
-        Vector3 position,
-        ClientRpcParams rpcParams = default)
+    public void SetSpawnPointClientRpc(Vector3 position, ClientRpcParams rpcParams = default)
     {
         if (!IsOwner) return;
         spawnPoint = position;

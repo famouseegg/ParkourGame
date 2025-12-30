@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -10,8 +11,9 @@ public class PlayerMove : NetworkBehaviour
     /* ========== 移動參數 ========== */
     [SerializeField] private float SprintSpeed = 20f;
     [SerializeField] private float MoveSpeed = 4.0f;
-    // 加速&減速
-    [SerializeField] private float SpeedChangeRate = 10.0f;
+    // 加速&減速速率
+    [SerializeField] private float speedAccelerationRate=10f;
+    [SerializeField] private float speedDecelerationRate=15f;   
 
 
     /* ========== 跳躍與重力參數 ========== */
@@ -166,6 +168,12 @@ public class PlayerMove : NetworkBehaviour
         if (currentHorizontalSpeed < targetSpeed - speedOffset ||
             currentHorizontalSpeed > targetSpeed + speedOffset)
         {
+            float SpeedChangeRate;
+
+            if(targetSpeed > currentHorizontalSpeed)
+                SpeedChangeRate = speedAccelerationRate;
+            else
+                SpeedChangeRate = speedDecelerationRate;
             // 線性插值
             speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed,
                 Time.deltaTime * SpeedChangeRate);
@@ -277,6 +285,14 @@ public class PlayerMove : NetworkBehaviour
     {
         if (!IsOwner) return;
         Knockback(force);
+    }
+
+    [ClientRpc]
+    public void ReduceSpeedDecelerationRateClientRpc(float reduceRate, ClientRpcParams rpcParams = default)
+    {
+        if (!IsOwner) return;
+        Debug.Log("Reducing speedDecelerationRate by: " + reduceRate);
+        speedDecelerationRate -= reduceRate;
     }
 
 }

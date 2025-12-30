@@ -14,7 +14,6 @@ public class RotatingBarPush : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!IsServer) return;
-        Debug.Log("RotatingBarPush Triggered by: " + other.gameObject.name);
         if((1<<other.gameObject.layer & playerMask) != 0)
         {
             PlayerMove player = other.gameObject.GetComponent<PlayerMove>();
