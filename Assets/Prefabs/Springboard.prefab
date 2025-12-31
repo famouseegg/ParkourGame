@@ -69,7 +69,7 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 128
-  strength: 10
+  launchStrength: 15
 --- !u!1 &2685389458179408692
 GameObject:
   m_ObjectHideFlags: 0
