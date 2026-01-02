@@ -172,11 +172,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2421117976698186085}
+  - component: {fileID: 8313000484154749620}
   - component: {fileID: 8565410986073753743}
   - component: {fileID: 6997492910264182973}
   - component: {fileID: 5176916618668376504}
   - component: {fileID: 4335580837894268077}
-  - component: {fileID: 8313000484154749620}
   - component: {fileID: -5259623683428703722}
   - component: {fileID: 1203919265590465887}
   - component: {fileID: 546315236759745065}
@@ -205,6 +205,31 @@ Transform:
   - {fileID: 1115854354416543622}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8313000484154749620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896470810385792603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1253956205
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &8565410986073753743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,10 +242,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b23f91f0fc7a7f40bf98a89f7e83083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
+  ShowTopMostFoldoutHeaderGroup: 1
   CinemachineCameraTarget: {fileID: 3381379925562085062}
   SprintSpeed: 10
-  MoveSpeed: 4
-  SpeedChangeRate: 10
+  MoveSpeed: 8
+  speedAccelerationRate: 10
+  speedDecelerationRate: 15
   JumpHeight: 2
   JumpTimeout: 0.1
   Gravity: -15
@@ -386,31 +413,6 @@ CharacterController:
   m_SkinWidth: 0.09
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8313000484154749620
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1896470810385792603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1253956205
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &-5259623683428703722
 MonoBehaviour:
   m_ObjectHideFlags: 0

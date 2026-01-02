@@ -10,7 +10,7 @@ public class PlayerMove : NetworkBehaviour
 
     /* ========== 移動參數 ========== */
     [SerializeField] private float SprintSpeed = 20f;
-    [SerializeField] private float MoveSpeed = 4.0f;
+    [SerializeField] private float MoveSpeed = 5.0f;
     // 加速&減速速率
     [SerializeField] private float speedAccelerationRate=10f;
     [SerializeField] private float speedDecelerationRate=15f;   
