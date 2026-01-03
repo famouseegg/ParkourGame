@@ -8,6 +8,7 @@ public class StarterAssetsInputs : MonoBehaviour
 	public bool sprint;
 	public bool analogMovement;
 
+	public float zoom;
 	public bool cursorLocked = true;
 	public bool cursorInputForLook = true;
 	public void OnMove(InputValue value)
@@ -35,6 +36,10 @@ public class StarterAssetsInputs : MonoBehaviour
 		SprintInput(value.isPressed);
 	}
 
+	public void OnZoom(InputValue value)
+	{
+		ZoomInput(value.Get<float>());
+	}
 
 	public void MoveInput(Vector2 newMoveDirection)
 	{
@@ -54,6 +59,11 @@ public class StarterAssetsInputs : MonoBehaviour
 	public void SprintInput(bool newSprintState)
 	{
 		sprint = newSprintState;
+	}
+
+	public void ZoomInput(float newZoomValue)
+	{
+		zoom = newZoomValue;
 	}
 
 	private void OnApplicationFocus(bool hasFocus)

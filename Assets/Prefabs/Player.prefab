@@ -276,6 +276,7 @@ MonoBehaviour:
   jump: 0
   sprint: 0
   analogMovement: 0
+  zoom: 0
   cursorLocked: 1
   cursorInputForLook: 1
 --- !u!114 &5176916618668376504
@@ -499,8 +500,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4e9578265da8f94daee48ac4d154024, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  virtualCamera: {fileID: 0}
   CinemachineCameraTarget: {fileID: 0}
   CameraAngleOverride: 0
+  minFOV: 40
+  maxFOV: 70
+  zoomSmoothTime: 0.1
+  zoomSpeed: 2
   TopClamp: 70
   BottomClamp: -30
   LockCameraPosition: 0
