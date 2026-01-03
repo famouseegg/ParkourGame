@@ -180,6 +180,7 @@ GameObject:
   - component: {fileID: -5259623683428703722}
   - component: {fileID: 1203919265590465887}
   - component: {fileID: 546315236759745065}
+  - component: {fileID: 1482302733989479184}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -243,7 +244,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   ShowTopMostFoldoutHeaderGroup: 1
-  CinemachineCameraTarget: {fileID: 3381379925562085062}
   SprintSpeed: 10
   MoveSpeed: 8
   speedAccelerationRate: 10
@@ -257,11 +257,7 @@ MonoBehaviour:
     m_Bits: 64
   Grounded: 1
   GroundedRadius: 0.28
-  CameraAngleOverride: 0
   RotationSmoothTime: 0.12
-  TopClamp: 70
-  BottomClamp: -30
-  LockCameraPosition: 0
   Damping: 6
 --- !u!114 &6997492910264182973
 MonoBehaviour:
@@ -491,6 +487,24 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   networkTransform: {fileID: 1203919265590465887}
   fallThreshold: -15
+--- !u!114 &1482302733989479184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896470810385792603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4e9578265da8f94daee48ac4d154024, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  CinemachineCameraTarget: {fileID: 0}
+  CameraAngleOverride: 0
+  TopClamp: 70
+  BottomClamp: -30
+  LockCameraPosition: 0
+  input: {fileID: 0}
 --- !u!1 &3381379925562085062
 GameObject:
   m_ObjectHideFlags: 0
@@ -502,7 +516,7 @@ GameObject:
   - component: {fileID: 7484516269669373646}
   - component: {fileID: 3125074098142051606}
   m_Layer: 7
-  m_Name: CamaraTarget
+  m_Name: CameraTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

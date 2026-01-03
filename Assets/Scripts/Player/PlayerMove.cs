@@ -5,15 +5,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class PlayerMove : NetworkBehaviour
 {
-    
-    [SerializeField] private GameObject CinemachineCameraTarget;
-
     /* ========== 移動參數 ========== */
     [SerializeField] private float SprintSpeed = 20f;
     [SerializeField] private float MoveSpeed = 5.0f;
     // 加速&減速速率
-    [SerializeField] private float speedAccelerationRate=10f;
-    [SerializeField] private float speedDecelerationRate=15f;   
+    [SerializeField] private float speedAccelerationRate = 10f;
+    [SerializeField] private float speedDecelerationRate = 15f;
 
 
     /* ========== 跳躍與重力參數 ========== */
@@ -23,28 +20,16 @@ public class PlayerMove : NetworkBehaviour
     [SerializeField] private float Gravity = -15.0f;
     // 離地高度補正
     [SerializeField] private float GroundedOffset = 0.9f;
-     // 地板圖層(什麼東西算地板)
+    // 地板圖層(什麼東西算地板)
     [SerializeField] private LayerMask GroundLayers;
     // 確認玩家是否在地板上
     [SerializeField] private bool Grounded = true;
-      // 地板檢測半徑
-     [SerializeField] private float GroundedRadius = 0.28f;
-
-    /* ========== 攝影機與旋轉角度參數 ========== */
-
-     // 攝影機角度補正
-    [SerializeField] private float CameraAngleOverride = 0.0f;
+    // 地板檢測半徑
+    [SerializeField] private float GroundedRadius = 0.28f;
     // 腳色旋轉速度
     [SerializeField] private float RotationSmoothTime = 0.12f;
-    // 視角最高最低限制
-    [SerializeField] private float TopClamp = 70.0f;
-    [SerializeField] private float BottomClamp = -30.0f;
-    
-    // 攝影機垂直旋轉限制
-    [SerializeField] private bool LockCameraPosition = false;
-    
+
     /* ========== 外力參數 ========== */
-    
     //擊退衰減速度
     [SerializeField] private float Damping = 6f;
     // 外力影響
@@ -52,11 +37,6 @@ public class PlayerMove : NetworkBehaviour
     // 是否正在被擊退
     private bool isKnockback;
 
-    
-
-    //水平方向旋轉角（左右轉）
-    private float cinemachineTargetPitch;
-    // 垂直方向旋轉角（上下看）
     private float cinemachineTargetYaw;
     private float speed;
 
@@ -74,11 +54,11 @@ public class PlayerMove : NetworkBehaviour
 
     // 閥值
     private const float THRESHOLD = 0.01f;
+
     private void Start()
     {
         // 只有一個Camara時適用
         mainCamera = Camera.main.gameObject;
-        cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
         controller = GetComponent<CharacterController>();
         input = GetComponent<StarterAssetsInputs>();
         jumpTimeoutDelta = JumpTimeout;
@@ -92,51 +72,18 @@ public class PlayerMove : NetworkBehaviour
         Move();
     }
 
-    private void LateUpdate()
-    {
-        CameraRotation();
-    }
-
     private void GroundedCheck()
     {
         // 在腳色底下設置一個球體檢測玩家是否在地板上
-        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,transform.position.z);
-        Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers,QueryTriggerInteraction.Ignore);
-    }
-
-    private void CameraRotation()
-    {           
-        //如果有輸入(設定閥值避免抖動) & 相機未鎖定
-        if (input.look.sqrMagnitude >= THRESHOLD && !LockCameraPosition)
-        {
-            cinemachineTargetYaw += input.look.x;
-            cinemachineTargetPitch += -input.look.y;
-           
-        }
-        
-        //限制旋轉角度在 360 度以內。
-        cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
-        cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, BottomClamp, TopClamp);
-
-        // Cinemachine 將跟著這一目標物體的旋轉
-        CinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + CameraAngleOverride,
-        cinemachineTargetYaw, 0.0f);
-
-    }
-
-    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
-    {
-        if (lfAngle < -360f) lfAngle += 360f;
-        if (lfAngle > 360f) lfAngle -= 360f;
-        return Mathf.Clamp(lfAngle, lfMin, lfMax);
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+        Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
     }
 
     private void Move()
     {
         if (isKnockback)
         {
-            controller.Move(externalVelocity * Time.deltaTime 
-                            + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+            controller.Move(externalVelocity * Time.deltaTime + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
 
             // 水平擊退逐漸衰減
             externalVelocity = Vector3.Lerp(
@@ -170,7 +117,7 @@ public class PlayerMove : NetworkBehaviour
         {
             float SpeedChangeRate;
 
-            if(targetSpeed > currentHorizontalSpeed)
+            if (targetSpeed > currentHorizontalSpeed)
                 SpeedChangeRate = speedAccelerationRate;
             else
                 SpeedChangeRate = speedDecelerationRate;
@@ -210,7 +157,7 @@ public class PlayerMove : NetworkBehaviour
     private void JumpAndGravity()
     {
         if (Grounded)
-        {  
+        {
 
             // 防止垂直速度無限累積
             if (verticalVelocity < 0.0f)
@@ -224,7 +171,7 @@ public class PlayerMove : NetworkBehaviour
             {
                 // 下落速度攻式 v = sqrt(h*-2*g) 
                 verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-            
+
             }
 
             // jump timeout
@@ -236,8 +183,8 @@ public class PlayerMove : NetworkBehaviour
         else
         {
             // 防止兔子跳
-            jumpTimeoutDelta = JumpTimeout;         
-            
+            jumpTimeoutDelta = JumpTimeout;
+
             // 防止「按住跳躍鍵」不放
             input.jump = false;
         }
@@ -247,7 +194,6 @@ public class PlayerMove : NetworkBehaviour
         {
             verticalVelocity += Gravity * Time.deltaTime;
         }
-        
     }
 
     // 繪製碰撞體
@@ -264,6 +210,7 @@ public class PlayerMove : NetworkBehaviour
             Gizmos.DrawWireSphere(spherePosition, GroundedRadius);
         }
     }
+
     public void Launch(float launchVelocity)
     {
         // 向上的初速
@@ -272,7 +219,7 @@ public class PlayerMove : NetworkBehaviour
         // 重置跳躍冷卻，避免跳板後馬上被判定 grounded
         jumpTimeoutDelta = JumpTimeout;
     }
-    
+
     [ClientRpc]
     public void ApplyKnockbackClientRpc(Vector3 force)
     {
@@ -291,5 +238,4 @@ public class PlayerMove : NetworkBehaviour
         Debug.Log("Reducing speedDecelerationRate by: " + reduceRate);
         speedDecelerationRate -= reduceRate;
     }
-
 }
