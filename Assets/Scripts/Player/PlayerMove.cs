@@ -29,6 +29,12 @@ public class PlayerMove : NetworkBehaviour
     // 腳色旋轉速度
     [SerializeField] private float RotationSmoothTime = 0.12f;
 
+    /* ========== 滑鏟參數 ========== */
+    [SerializeField] private Animator diveAnim;
+    [SerializeField] private float diveDuration = 0.3f;
+    [SerializeField] private float diveCooldown = 0.5f;
+    [SerializeField] private float diveForce = 10f;
+
     /* ========== 外力參數 ========== */
     //擊退衰減速度
     [SerializeField] private float Damping = 6f;
@@ -51,6 +57,13 @@ public class PlayerMove : NetworkBehaviour
     private CharacterController controller;
     private StarterAssetsInputs input;
     private GameObject mainCamera;
+
+    // 滑鏟狀態變數
+    private Vector3 currentDiveDir;
+    private float diveDurationTimer = 0f;
+    private float diveCooldownTimer = 0f;
+    private bool isDiving = false;
+    private bool canAirDive = true;
 
     // 閥值
     private const float THRESHOLD = 0.01f;
@@ -78,6 +91,8 @@ public class PlayerMove : NetworkBehaviour
         JumpAndGravity();
         GroundedCheck();
         Move();
+        Dive();
+        Attack();
     }
 
     private void GroundedCheck()
@@ -165,6 +180,90 @@ public class PlayerMove : NetworkBehaviour
         // move the player
         controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
                             new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+    }
+
+    private void Dive()
+    {
+        if (Grounded) canAirDive = true;
+
+        diveDurationTimer -= Time.deltaTime;
+        diveCooldownTimer -= Time.deltaTime;
+
+        HandleDiveMovement();
+
+        if (!input.dive || isDiving) return;
+
+        if (diveCooldownTimer > 0)
+        {
+            input.dive = false;
+            return;
+        }
+
+        if (Grounded || canAirDive)
+        {
+            if (!Grounded) canAirDive = false;
+
+            isDiving = true;
+            diveDurationTimer = diveDuration;
+            diveCooldownTimer = diveCooldown;
+            currentDiveDir = transform.forward;
+
+            if (diveAnim != null)
+            {
+                diveAnim.SetTrigger("isDive");
+            }
+        }
+        input.dive = false;
+    }
+
+    private void HandleDiveMovement()
+    {
+        if (!isDiving) return;
+
+        controller.Move(currentDiveDir * diveForce * Time.deltaTime);
+
+        if (diveDurationTimer <= 0f) isDiving = false;
+    }
+
+    // 處理左鍵攻擊
+    [SerializeField] private Animator attackAnim;
+    [SerializeField] private float attackDuration = 0.2f;
+    [SerializeField] private float attackCooldown = 0.5f;
+    private float attackDurationTimer = 0f;
+    private float attackCooldownTimer = 0f;
+    private bool isAttacking = false;
+
+    private void Attack()
+    {
+        attackDurationTimer -= Time.deltaTime;
+        attackCooldownTimer -= Time.deltaTime;
+
+        if (isAttacking && attackDurationTimer <= 0f)
+        {
+            isAttacking = false;
+        }
+
+        if (input.attack && !isAttacking)
+        {
+            if (attackCooldownTimer > 0)
+            {
+                input.attack = false;
+                return;
+            }
+
+            // 啟動攻擊
+            isAttacking = true;
+            attackDurationTimer = attackDuration;
+            attackCooldownTimer = attackCooldown;
+
+            if (attackAnim != null)
+            {
+                attackAnim.SetTrigger("IsAttack");
+                Debug.Log("Attack Animation Triggered");
+            }
+            Debug.Log("Attack Triggered");
+        }
+        input.attack = false;
     }
 
     private void JumpAndGravity()

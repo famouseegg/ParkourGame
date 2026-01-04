@@ -36,10 +36,17 @@ public class PlayerListUI : LobbyUI
     }
     private void UpdateVisuals(Lobby lobby)
     {
+        // 先複製一份清單，避免遍歷時物件被刪除導致錯誤
+        var toDestroy = new System.Collections.Generic.List<Transform>();
         foreach(Transform child in container)
         {
             if(child == SinglePlayerNameListTemplate) continue;
-            Destroy(child.gameObject);
+            toDestroy.Add(child);
+        }
+        foreach(var child in toDestroy)
+        {
+            if(child != null)
+                Destroy(child.gameObject);
         }
 
         foreach(Player player in lobby.Players)
