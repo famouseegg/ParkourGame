@@ -58,9 +58,17 @@ public class PlayerMove : NetworkBehaviour
     private void Start()
     {
         // 只有一個Camara時適用
-        mainCamera = Camera.main.gameObject;
-        controller = GetComponent<CharacterController>();
-        input = GetComponent<StarterAssetsInputs>();
+        if (Camera.main != null)
+            mainCamera = Camera.main.gameObject;
+        else
+            Debug.LogError("場景缺少 Camera.main");
+
+        if (controller == null)
+            controller = GetComponent<CharacterController>();
+
+        if (input == null)
+            input = GetComponent<StarterAssetsInputs>();
+
         jumpTimeoutDelta = JumpTimeout;
         GroundedOffset = (controller.height / 2f) + controller.center.y;
     }
@@ -138,6 +146,11 @@ public class PlayerMove : NetworkBehaviour
         // 避免抖動
         if (input.move != Vector2.zero)
         {
+            if (mainCamera == null)
+            {
+                Debug.LogError("PlayerMove: mainCamera is null; cannot rotate player.");
+                return;
+            }
             targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
                                 mainCamera.transform.eulerAngles.y;
             float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
@@ -171,7 +184,6 @@ public class PlayerMove : NetworkBehaviour
             {
                 // 下落速度攻式 v = sqrt(h*-2*g) 
                 verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-
             }
 
             // jump timeout
@@ -236,6 +248,6 @@ public class PlayerMove : NetworkBehaviour
     {
         if (!IsOwner) return;
         Debug.Log("Reducing speedDecelerationRate by: " + reduceRate);
-        speedDecelerationRate -= reduceRate;
+        speedDecelerationRate = Mathf.Max(0f, speedDecelerationRate - reduceRate);
     }
 }

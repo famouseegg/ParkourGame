@@ -41,17 +41,29 @@ public class CameraController : MonoBehaviour
             if (found != null)
                 CinemachineCameraTarget = found.gameObject;
             else
+            {
                 Debug.LogError("找不到 CameraTarget 子物件！");
+                return;
+            }
         }
         if (virtualCamera == null)
         {
             virtualCamera = FindAnyObjectByType<CinemachineCamera>();
             if (virtualCamera == null)
+            {
                 Debug.LogError("找不到 CinemachineCamera 元件！");
+                return;
+            }
         }
         // 初始化旋轉角度
         cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-        input = GetComponent<StarterAssetsInputs>();
+        cinemachineTargetPitch = CinemachineCameraTarget.transform.rotation.eulerAngles.x;
+        if (input == null)
+            input = GetComponent<StarterAssetsInputs>();
+        if (virtualCamera != null)
+        {
+            targetFOV = virtualCamera.Lens.FieldOfView;
+        }
     }
 
     private void LateUpdate()
