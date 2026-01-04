@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -28,13 +29,13 @@ public class PlayerMove : NetworkBehaviour
     [SerializeField] private float GroundedOffset = -0.14f;
 
     [Header("Dive")]
-    [SerializeField] private Animator diveAnim;
+    [SerializeField] private NetworkAnimator diveAnim;
     [SerializeField] private float diveSpeed = 15f;
     [SerializeField] private float diveDuration = 0.3f;
     [SerializeField] private float diveCooldown = 0.5f;
 
     [Header("Attack")]
-    [SerializeField] private Animator attackAnim;
+    [SerializeField] private NetworkAnimator attackAnim;
     [SerializeField] private float attackDuration = 0.2f;
     [SerializeField] private float attackCooldown = 0.5f;
 
@@ -261,6 +262,8 @@ public class PlayerMove : NetworkBehaviour
 
             if (diveAnim != null)
             {
+                if (!IsOwner) return;
+
                 diveAnim.SetTrigger("isDive");
             }
         }
@@ -304,7 +307,9 @@ public class PlayerMove : NetworkBehaviour
 
             if (attackAnim != null)
             {
-                attackAnim.SetTrigger("IsAttack");
+                if (!IsOwner) return;
+
+                attackAnim.SetTrigger("isAttack");
             }
         }
         input.attack = false;

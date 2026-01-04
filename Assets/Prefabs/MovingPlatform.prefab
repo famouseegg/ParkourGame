@@ -92,14 +92,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 0
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 2407346402
+  InScenePlacedSourceGlobalObjectIdHash: 3301250364
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -318,6 +318,7 @@ GameObject:
   - component: {fileID: 6186764340990003056}
   - component: {fileID: 3154128988852061404}
   - component: {fileID: 3454672007268294570}
+  - component: {fileID: 5528872620349340189}
   m_Layer: 0
   m_Name: MovingPlatform
   m_TagString: Untagged
@@ -355,8 +356,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3301250364
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 781931117
+  InScenePlacedSourceGlobalObjectIdHash: 3301250364
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -384,8 +385,30 @@ MonoBehaviour:
   PointA: {fileID: 1605888690244147632}
   PointB: {fileID: 7616442292535461477}
   platformParent: {fileID: 101567726637987870}
-  speed: 10
+  speed: 4
   delay: 1
+--- !u!95 &5528872620349340189
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7416615766011733528}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b46319b1761ebe34d9ae5d6a4d52fb07, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &7616442292535461477
 GameObject:
   m_ObjectHideFlags: 0

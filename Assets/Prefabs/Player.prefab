@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1253956205
+  GlobalObjectIdHash: 946521734
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -262,11 +262,11 @@ MonoBehaviour:
     m_Bits: 64
   GroundedRadius: 0.28
   GroundedOffset: -0.14
-  diveAnim: {fileID: 8325916861784279343}
+  diveAnim: {fileID: 1633138157031680451}
   diveSpeed: 15
   diveDuration: 0.3
   diveCooldown: 0.5
-  attackAnim: {fileID: 9027549271507638451}
+  attackAnim: {fileID: 649411829205728644}
   attackDuration: 0.2
   attackCooldown: 0.5
 --- !u!114 &6997492910264182973
@@ -769,6 +769,7 @@ GameObject:
   - component: {fileID: 7062965697115835936}
   - component: {fileID: 4250106426898638247}
   - component: {fileID: 8325916861784279343}
+  - component: {fileID: 1633138157031680451}
   m_Layer: 7
   m_Name: PlayerVisual
   m_TagString: Untagged
@@ -917,6 +918,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1633138157031680451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8512894242511370188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 8325916861784279343}
 --- !u!1 &8883251298166140541
 GameObject:
   m_ObjectHideFlags: 0
@@ -1094,29 +1110,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2675256419717056730}
     m_Modifications:
-    - target: {fileID: 5469911579755330283, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
       propertyPath: m_Name
       value: HammerWeapon
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6602887580977676676, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6602887580977676676, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6602887580977676676, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6602887580977676676, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1161,40 +1157,21 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9027549271507638451}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
+--- !u!114 &649411829205728644 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3702001932063635802, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
+  m_PrefabInstance: {fileID: 4207219372915688670}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
 --- !u!4 &7043947575577888090 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6602887580977676676, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
   m_PrefabInstance: {fileID: 4207219372915688670}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &7677212756100718560 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
-  m_PrefabInstance: {fileID: 4207219372915688670}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &9027549271507638451
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7677212756100718560}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: b46319b1761ebe34d9ae5d6a4d52fb07, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
