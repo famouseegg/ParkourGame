@@ -245,25 +245,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   ShowTopMostFoldoutHeaderGroup: 1
-  SprintSpeed: 10
   MoveSpeed: 8
-  speedAccelerationRate: 10
-  speedDecelerationRate: 15
-  JumpHeight: 2
+  SprintSpeed: 12
+  accelTime: 0.1
+  decelTime: 0.02
+  airAccelTime: 0.15
+  airDecelTime: 0.5
+  RotationSmoothTime: 0.12
+  JumpHeight: 3
   JumpTimeout: 0.1
   Gravity: -15
-  GroundedOffset: -0.14
+  Damping: 6
+  terminalVelocity: 53
   GroundLayers:
     serializedVersion: 2
     m_Bits: 64
-  Grounded: 1
   GroundedRadius: 0.28
-  RotationSmoothTime: 0.12
+  GroundedOffset: -0.14
   diveAnim: {fileID: 8325916861784279343}
+  diveSpeed: 15
   diveDuration: 0.3
   diveCooldown: 0.5
-  diveForce: 10
-  Damping: 6
   attackAnim: {fileID: 9027549271507638451}
   attackDuration: 0.2
   attackCooldown: 0.5

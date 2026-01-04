@@ -5,68 +5,73 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class PlayerMove : NetworkBehaviour
 {
-    /* ========== 移動參數 ========== */
-    [SerializeField] private float SprintSpeed = 20f;
-    [SerializeField] private float MoveSpeed = 5.0f;
-    // 加速&減速速率
-    [SerializeField] private float speedAccelerationRate = 10f;
-    [SerializeField] private float speedDecelerationRate = 15f;
+    /* ========== 外部可調整參數 ========== */
+    [Header("Movement Settings")]
+    [SerializeField] private float MoveSpeed = 8.0f;
+    [SerializeField] private float SprintSpeed = 12f;
+    [SerializeField] private float accelTime = 0.1f;        // 地面加速
+    [SerializeField] private float decelTime = 0.02f;       // 地面煞車
+    [SerializeField] private float airAccelTime = 0.15f;    // 空中加速
+    [SerializeField] private float airDecelTime = 0.5f;     // 空中慣性
+    [SerializeField] private float RotationSmoothTime = 0.12f; // 旋轉平滑時間
 
-
-    /* ========== 跳躍與重力參數 ========== */
-    [SerializeField] private float JumpHeight = 2.0f;
+    [Header("Jump / Gravity / Knockback")]
+    [SerializeField] private float JumpHeight = 3.0f;
     [SerializeField] private float JumpTimeout = 0.10f;
-    // 重力
     [SerializeField] private float Gravity = -15.0f;
-    // 離地高度補正
-    [SerializeField] private float GroundedOffset = 0.9f;
-    // 地板圖層(什麼東西算地板)
-    [SerializeField] private LayerMask GroundLayers;
-    // 確認玩家是否在地板上
-    [SerializeField] private bool Grounded = true;
-    // 地板檢測半徑
-    [SerializeField] private float GroundedRadius = 0.28f;
-    // 腳色旋轉速度
-    [SerializeField] private float RotationSmoothTime = 0.12f;
+    [SerializeField] private float Damping = 6f;
+    [SerializeField] private float terminalVelocity = 53.0f; // 最大落速
 
-    /* ========== 滑鏟參數 ========== */
+    [Header("Ground Check")]
+    [SerializeField] private LayerMask GroundLayers;
+    [SerializeField] private float GroundedRadius = 0.28f;
+    [SerializeField] private float GroundedOffset = -0.14f;
+
+    [Header("Dive")]
     [SerializeField] private Animator diveAnim;
+    [SerializeField] private float diveSpeed = 15f;
     [SerializeField] private float diveDuration = 0.3f;
     [SerializeField] private float diveCooldown = 0.5f;
-    [SerializeField] private float diveForce = 10f;
 
-    /* ========== 外力參數 ========== */
-    //擊退衰減速度
-    [SerializeField] private float Damping = 6f;
-    // 外力影響
-    private Vector3 externalVelocity;
-    // 是否正在被擊退
-    private bool isKnockback;
+    [Header("Attack")]
+    [SerializeField] private Animator attackAnim;
+    [SerializeField] private float attackDuration = 0.2f;
+    [SerializeField] private float attackCooldown = 0.5f;
 
-    private float cinemachineTargetYaw;
-    private float speed;
-
-    //追蹤旋轉角度
-    private float rotationVelocity;
-    //追蹤下落角度
-    private float verticalVelocity;
-    private float jumpTimeoutDelta;
-    //最大掉落速度
-    private float terminalVelocity = 53.0f;
-    private float targetRotation = 0.0f;
+    /* ========== 內部狀態變數 ========== */
+    // 組件引用
     private CharacterController controller;
     private StarterAssetsInputs input;
     private GameObject mainCamera;
 
-    // 滑鏟狀態變數
-    private Vector3 currentDiveDir;
-    private float diveDurationTimer = 0f;
-    private float diveCooldownTimer = 0f;
+    // 移動數值追蹤
+    private float speed;
+    private float speedVelocity;    // SmoothDamp 使用
+    private float verticalVelocity;
+    private float targetRotation = 0.0f;
+    private float rotationVelocity; // SmoothDampAngle 使用
+
+    // 狀態計時器與標記
+    private bool Grounded = true;
+    private float jumpTimeoutDelta;
+
     private bool isDiving = false;
     private bool canAirDive = true;
+    private Vector3 currentDiveDir;
+    private float diveDurationTimer;
+    private float diveCooldownTimer;
 
-    // 閥值
-    private const float THRESHOLD = 0.01f;
+    private bool isAttacking = false;
+    private float attackDurationTimer;
+    private float attackCooldownTimer;
+
+    private bool isKnockback;
+    private Vector3 externalVelocity;
+
+    // 移動平台相關
+    private Transform currentPlatform = null;
+    private Vector3 lastPlatformPosition;
+    private Vector3 platformDelta;
 
     private void Start()
     {
@@ -88,6 +93,8 @@ public class PlayerMove : NetworkBehaviour
 
     private void Update()
     {
+        if (!IsOwner) return;
+
         JumpAndGravity();
         GroundedCheck();
         Move();
@@ -95,11 +102,59 @@ public class PlayerMove : NetworkBehaviour
         Attack();
     }
 
+    private void LateUpdate()
+    {
+        if (!IsOwner || currentPlatform == null) return;
+
+        // 計算位移
+        Vector3 currentPlatformPos = currentPlatform.position;
+        platformDelta = currentPlatformPos - lastPlatformPosition;
+
+        // 只有在有位移時才移動
+        if (platformDelta.sqrMagnitude > 0)
+        {
+            controller.Move(platformDelta);
+        }
+
+        // 更新紀錄
+        lastPlatformPosition = currentPlatformPos;
+    }
+
     private void GroundedCheck()
     {
         // 在腳色底下設置一個球體檢測玩家是否在地板上
         Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
         Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+
+        RaycastHit hit;
+        // 使用 SphereCast 偵測腳下
+        if (Physics.SphereCast(transform.position, GroundedRadius, Vector3.down, out hit, GroundedOffset + 0.5f, GroundLayers, QueryTriggerInteraction.Ignore))
+        {
+            // 找到移動腳本
+            var movingPlatform = hit.collider.GetComponentInParent<MovingPlatform>();
+
+            if (movingPlatform != null)
+            {
+                // 鎖定腳本中指定的會動的 platformParent
+                Transform actualMovingTransform = movingPlatform.GetPlatformTransform();
+
+                if (currentPlatform != actualMovingTransform)
+                {
+                    currentPlatform = actualMovingTransform;
+                    lastPlatformPosition = currentPlatform.position;
+                }
+            }
+            else
+            {
+                // 離開移動平台
+                currentPlatform = null;
+            }
+        }
+        else
+        {
+            // 離開地面檢測範圍
+            currentPlatform = null;
+        }
     }
 
     private void Move()
@@ -126,34 +181,27 @@ public class PlayerMove : NetworkBehaviour
             return;
         }
 
+        if (input.sprint) { Debug.Log("Sprint Triggered"); }
         float targetSpeed = input.sprint ? SprintSpeed : MoveSpeed;
 
         if (input.move == Vector2.zero) targetSpeed = 0.0f;
 
-        // 取得水平速度
-        float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
-        // 避免抖動(不停地加速減速)
-        float speedOffset = 0.1f;
-
-        if (currentHorizontalSpeed < targetSpeed - speedOffset ||
-            currentHorizontalSpeed > targetSpeed + speedOffset)
+        if (!isDiving)
         {
-            float SpeedChangeRate;
-
-            if (targetSpeed > currentHorizontalSpeed)
-                SpeedChangeRate = speedAccelerationRate;
+            // 地面急停
+            if (Grounded && targetSpeed < 0.01f && speed < 0.5f)
+            {
+                speed = 0f;
+                speedVelocity = 0f; // 清空慣性
+            }
             else
-                SpeedChangeRate = speedDecelerationRate;
-            // 線性插值
-            speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed,
-                Time.deltaTime * SpeedChangeRate);
+            {
+                float targetSmoothTime = (targetSpeed > speed)
+                ? (Grounded ? accelTime : airAccelTime)
+                : (Grounded ? decelTime : airDecelTime);
 
-            // 限制小數點
-            speed = Mathf.Round(speed * 1000f) / 1000f;
-        }
-        else
-        {
-            speed = targetSpeed;
+                speed = Mathf.SmoothDamp(speed, targetSpeed, ref speedVelocity, targetSmoothTime);
+            }
         }
 
         // 把vector2 輸入轉為 vector3
@@ -176,10 +224,13 @@ public class PlayerMove : NetworkBehaviour
         }
 
         Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+        Vector3 playerMotion = (targetDirection * speed + new Vector3(0, verticalVelocity, 0)) * Time.deltaTime;
 
         // move the player
-        controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
-                            new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+        if (!isDiving)
+        {
+            controller.Move(playerMotion);
+        }
     }
 
     private void Dive()
@@ -220,18 +271,13 @@ public class PlayerMove : NetworkBehaviour
     {
         if (!isDiving) return;
 
-        controller.Move(currentDiveDir * diveForce * Time.deltaTime);
+        speed = diveSpeed;
+        speedVelocity = 0f;
 
-        if (diveDurationTimer <= 0f) isDiving = false;
+        controller.Move(currentDiveDir * diveSpeed * Time.deltaTime);
+
+        if (diveDurationTimer <= 0f) { isDiving = false; }
     }
-
-    // 處理左鍵攻擊
-    [SerializeField] private Animator attackAnim;
-    [SerializeField] private float attackDuration = 0.2f;
-    [SerializeField] private float attackCooldown = 0.5f;
-    private float attackDurationTimer = 0f;
-    private float attackCooldownTimer = 0f;
-    private bool isAttacking = false;
 
     private void Attack()
     {
@@ -259,9 +305,7 @@ public class PlayerMove : NetworkBehaviour
             if (attackAnim != null)
             {
                 attackAnim.SetTrigger("IsAttack");
-                Debug.Log("Attack Animation Triggered");
             }
-            Debug.Log("Attack Triggered");
         }
         input.attack = false;
     }
@@ -343,10 +387,10 @@ public class PlayerMove : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void ReduceSpeedDecelerationRateClientRpc(float reduceRate, ClientRpcParams rpcParams = default)
+    public void AdjustDecelTimeClientRpc(float adjustment, ClientRpcParams rpcParams = default)
     {
         if (!IsOwner) return;
-        Debug.Log("Reducing speedDecelerationRate by: " + reduceRate);
-        speedDecelerationRate = Mathf.Max(0f, speedDecelerationRate - reduceRate);
+        decelTime = Mathf.Max(0.01f, decelTime + adjustment);
+        Debug.Log("目前的減速時間: " + decelTime);
     }
 }
