@@ -12,6 +12,7 @@ public class MovingPlatform : NetworkBehaviour
     [SerializeField] private float delay=1f;
 
     private Vector3 targetPosit;
+
     public override void OnNetworkSpawn()
     {
         if(!IsServer)
@@ -22,6 +23,13 @@ public class MovingPlatform : NetworkBehaviour
         StartCoroutine(MovePlateform());
         
     }
+
+    public Transform GetPlatformTransform()
+    {
+        // 回傳移動平台的 Transform
+        return platformParent.transform; 
+    }
+
     IEnumerator MovePlateform()
     {
         while (true)

@@ -8,10 +8,11 @@ public class CrumblePlatformCollider : NetworkBehaviour
     [SerializeField] private LayerMask playerMask;
     [SerializeField] private float crumbleTime = 0.5f;
     [SerializeField] private float respawnTime = 2.0f;
+    [SerializeField] private Animator platformAnimator;
 
     // NetworkVariable 預設為全體可讀，伺服器可寫
     private NetworkVariable<bool> isActive = new NetworkVariable<bool>(true);
-    
+
     // 只在伺服器端標記，不需要同步
     private bool isTriggered = false;
 
@@ -64,6 +65,7 @@ public class CrumblePlatformCollider : NetworkBehaviour
     {
         if (isTriggered) return;
         isTriggered = true;
+        platformAnimator.SetBool("isCrumbling", true);
         StartCoroutine(CrumbleRoutine());
     }
 
@@ -71,12 +73,13 @@ public class CrumblePlatformCollider : NetworkBehaviour
     {
         // 等待崩塌時間
         yield return new WaitForSeconds(crumbleTime);
-        isActive.Value = false; 
+        isActive.Value = false;
 
         // 等待重生時間
         yield return new WaitForSeconds(respawnTime);
-        
+
         isActive.Value = true;
-        isTriggered = false; 
+        isTriggered = false;
+        platformAnimator.SetBool("isCrumbling", false);
     }
 }
