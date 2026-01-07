@@ -8,26 +8,26 @@ public class MovingPlatform : NetworkBehaviour
     [SerializeField] private GameObject PointA;
     [SerializeField] private GameObject PointB;
     [SerializeField] private GameObject platformParent;
-    [SerializeField] private float speed=10f;
-    [SerializeField] private float delay=1f;
+    [SerializeField] private float speed = 10f;
+    [SerializeField] private float delay = 1f;
 
     private Vector3 targetPosit;
 
     public override void OnNetworkSpawn()
     {
-        if(!IsServer)
+        if (!IsServer)
             return;
+
         platformParent.transform.position = PointA.transform.position;
         targetPosit = PointB.transform.position;
         //模擬非同步
         StartCoroutine(MovePlateform());
-        
     }
 
     public Transform GetPlatformTransform()
     {
         // 回傳移動平台的 Transform
-        return platformParent.transform; 
+        return platformParent.transform;
     }
 
     IEnumerator MovePlateform()
@@ -37,10 +37,10 @@ public class MovingPlatform : NetworkBehaviour
             while ((targetPosit - platformParent.transform.position).sqrMagnitude > 0.01f)
             {
                 platformParent.transform.position = Vector3.MoveTowards(platformParent.transform.position
-                    ,targetPosit,speed*Time.deltaTime);
-                    yield return null;
+                    , targetPosit, speed * Time.deltaTime);
+                yield return null;
             }
-            if(targetPosit == PointA.transform.position)
+            if (targetPosit == PointA.transform.position)
                 targetPosit = PointB.transform.position;
             else
                 targetPosit = PointA.transform.position;
