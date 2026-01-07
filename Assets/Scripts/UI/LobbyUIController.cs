@@ -1,62 +1,97 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Analytics;
 
-public class LobbyUIController : MonoBehaviour
+/// <summary>
+/// 大廳 UI 控制器 - 統一管理所有大廳相關的 UI 顯示
+/// 使用狀態模式切換不同的 UI 面板
+/// </summary>
+public class LobbyUIController : Singleton<LobbyUIController>
 {
-    public static LobbyUIController Instance;
+    [Header("UI 面板")]
     [SerializeField] private LobbyListUI lobbyListUI;
     [SerializeField] private CreatLobbyUI creatLobbyUI;
     [SerializeField] private PlayerListUI playerListUI;
-    public enum State{
-        NULL,
-        LobbyList,
-        CreatLobbyUI,
-        PlayerList,
-        HideAll
-    }
-    private State state;
-    List<LobbyUI> uiList = new List<LobbyUI>();
-    private void Awake()
+
+    private State currentState;
+    private List<UIPanel> uiList = new List<UIPanel>();
+
+    /// <summary>
+    /// UI 狀態枚舉
+    /// </summary>
+    public enum State
     {
-        if(Instance != null)
-        {
-            Debug.LogWarning("多個 LobbyUIController 實例存在於場景中，僅保留一個實例。");   
-        }
-        else
-        {
-            Instance = this;
-        }
+        NULL,
+        LobbyList,      // 大廳列表
+        CreatLobbyUI,   // 創建大廳
+        PlayerList,     // 玩家列表
+        HideAll         // 隱藏所有
+    }
+
+    protected override void Awake()
+    {
+        base.Awake();
     }
 
     private void Start()
     {
-        state = State.LobbyList;
-        uiList.Add(lobbyListUI);
-        uiList.Add(creatLobbyUI);
-        uiList.Add(playerListUI);
+        InitializeUI();
     }
+
+    private void InitializeUI()
+    {
+        // 檢查 UI 引用
+        if (lobbyListUI == null)
+            Debug.LogError("[LobbyUIController] LobbyListUI 未設置！請在 Inspector 中設置引用。");
+        if (creatLobbyUI == null)
+            Debug.LogError("[LobbyUIController] CreatLobbyUI 未設置！請在 Inspector 中設置引用。");
+        if (playerListUI == null)
+            Debug.LogError("[LobbyUIController] PlayerListUI 未設置！請在 Inspector 中設置引用。");
+
+        // 初始化 UI 列表
+        uiList.Clear();
+        if (lobbyListUI != null) uiList.Add(lobbyListUI);
+        if (creatLobbyUI != null) uiList.Add(creatLobbyUI);
+        if (playerListUI != null) uiList.Add(playerListUI);
+
+        // 設置初始狀態
+        ChangeUI(State.LobbyList);
+    }
+
+    /// <summary>
+    /// 獲取當前狀態
+    /// </summary>
     public State Getstate()
     {
-        return state;
+        return currentState;
     }
-    public void ChangeUI(State state,bool isHost=false)
+
+    /// <summary>
+    /// 切換 UI 狀態
+    /// </summary>
+    /// <param name="newState">要切換到的狀態</param>
+    /// <param name="isHost">是否為 Host（僅在 PlayerList 狀態使用）</param>
+    public void ChangeUI(State newState, bool isHost = false)
     {
-        if(this.state == state)
+        // 避免重複切換
+        if (currentState == newState)
             return;
-        else
-            this.state = state;
-        switch (state)
-        {   
-            default:
-                Debug.Log("LobbyUIController State is null ");
+
+        currentState = newState;
+
+        switch (newState)
+        {
+            case State.NULL:
+                Debug.LogWarning("[LobbyUIController] 切換到 NULL 狀態");
                 break;
+
             case State.LobbyList:
                 UpdateUI(lobbyListUI);
                 break;
+
             case State.CreatLobbyUI:
                 UpdateUI(creatLobbyUI);
                 break;
+
             case State.PlayerList:
                 UpdateUI(playerListUI);
                 if (!isHost)
@@ -64,29 +99,84 @@ public class LobbyUIController : MonoBehaviour
                     playerListUI.HideStartButton();
                 }
                 break;
+
             case State.HideAll:
-                UpdateUI();
+                HideAllUI();
+                Debug.Log("[LobbyUIController] 隱藏所有 UI");
+                break;
+
+            default:
+                Debug.LogError($"[LobbyUIController] 未處理的狀態: {newState}");
                 break;
         }
     }
-    private void UpdateUI(LobbyUI showUI)
+
+    /// <summary>
+    /// 更新 UI 顯示 - 顯示指定的 UI，隱藏其他
+    /// </summary>
+    private void UpdateUI(UIPanel showUI)
     {
-        foreach(LobbyUI lobbyUI in uiList)
+        if (showUI == null)
         {
-            if(lobbyUI == showUI)
-            {
-                lobbyUI.Show();
-                continue;
-            }
-            lobbyUI.Hide();
+            Debug.LogError("[LobbyUIController] 嘗試顯示的 UI 為 null！");
+            return;
         }
-    }
-    private void UpdateUI()
-    {
-        foreach(LobbyUI lobbyUI in uiList)
-        {           
-            lobbyUI.Hide();
+
+        foreach (UIPanel panel in uiList)
+        {
+            if (panel == null) continue;
+
+            if (panel == showUI)
+            {
+                panel.Show();
+            }
+            else
+            {
+                panel.Hide();
+            }
         }
     }
 
+    /// <summary>
+    /// 隱藏所有 UI
+    /// </summary>
+    private void HideAllUI()
+    {
+        foreach (UIPanel panel in uiList)
+        {
+            panel.Hide();
+        }
+    }
+
+    /// <summary>
+    /// 顯示大廳列表
+    /// </summary>
+    public void ShowLobbyList()
+    {
+        ChangeUI(State.LobbyList);
+    }
+
+    /// <summary>
+    /// 顯示創建大廳介面
+    /// </summary>
+    public void ShowCreateLobby()
+    {
+        ChangeUI(State.CreatLobbyUI);
+    }
+
+    /// <summary>
+    /// 顯示玩家列表
+    /// </summary>
+    public void ShowPlayerList(bool isHost)
+    {
+        ChangeUI(State.PlayerList, isHost);
+    }
+
+    /// <summary>
+    /// 隱藏所有 UI（通常在進入遊戲時使用）
+    /// </summary>
+    public void HideAll()
+    {
+        ChangeUI(State.HideAll);
+    }
 }

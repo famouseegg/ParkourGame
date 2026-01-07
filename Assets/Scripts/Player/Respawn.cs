@@ -2,32 +2,95 @@ using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
 
+/// <summary>
+/// 玩家重生系統 - 處理掉落和重生邏輯
+/// 已整合場景生命週期管理
+/// </summary>
 public class Respawn : NetworkBehaviour
 {
     [SerializeField] private NetworkTransform networkTransform;
-
     [SerializeField] private float fallThreshold = -15.0f;
-    private CharacterController controller;
 
+    private CharacterController controller;
     private Vector3 spawnPoint;
+    private bool isSpawnPointReady = false;
+
     public override void OnNetworkSpawn()
     {
-        if(!IsOwner)return;
+        if (!IsOwner) return;
 
-        spawnPoint = DefaulReSpawnPoint.Instance.GetTransform().position;
-        controller = this.GetComponent<CharacterController>();
-    }
-    private void Update()
-    {
-        if(!IsOwner) return;
-        if(transform.position.y <= fallThreshold)
+        controller = GetComponent<CharacterController>();
+
+        // 訂閱重生點事件
+        DefaulReSpawnPoint.OnSpawnPointReady += OnSpawnPointReady;
+
+        // 訂閱場景生命週期事件
+        if (SceneLifecycleManager.Instance != null)
         {
-            DoSpawn();
+            SceneLifecycleManager.Instance.OnScenePostLoad += OnSceneLoadComplete;
         }
     }
-    private void DoSpawn()
+
+    public override void OnNetworkDespawn()
     {
-        //Charactor controller 會影響傳送須暫時關閉
+        if (!IsOwner) return;
+
+        // 取消訂閱
+        DefaulReSpawnPoint.OnSpawnPointReady -= OnSpawnPointReady;
+
+        if (SceneLifecycleManager.Instance != null)
+        {
+            SceneLifecycleManager.Instance.OnScenePostLoad -= OnSceneLoadComplete;
+        }
+    }
+
+    private void OnSceneLoadComplete(string sceneName)
+    {
+        if (!IsOwner) return;
+
+        // 場景切換後重置狀態
+        isSpawnPointReady = false;
+        Debug.Log($"[Respawn] 場景 {sceneName} 載入完成，等待重生點就緒");
+    }
+
+    private void OnSpawnPointReady(Vector3 point)
+    {
+        if (!IsOwner) return;
+
+        spawnPoint = point;
+        isSpawnPointReady = true;
+
+        if (controller == null)
+            controller = GetComponent<CharacterController>();
+
+        // 傳送到重生點
+        TeleportToSpawnPoint();
+
+        Debug.Log($"[Respawn] 重生點已設置: {point}");
+    }
+
+    private void Update()
+    {
+        if (!IsOwner || !isSpawnPointReady) return;
+
+        // 檢查是否掉落
+        if (transform.position.y <= fallThreshold)
+        {
+            DoRespawn();
+        }
+    }
+
+    private void DoRespawn()
+    {
+        Debug.Log("[Respawn] 玩家掉落，執行重生");
+        TeleportToSpawnPoint();
+    }
+
+    private void TeleportToSpawnPoint()
+    {
+        if (controller == null || networkTransform == null) return;
+
+        // Character Controller 會影響傳送，須暫時關閉
         controller.enabled = false;
 
         networkTransform.Teleport(spawnPoint, transform.rotation, transform.localScale);
@@ -35,10 +98,56 @@ public class Respawn : NetworkBehaviour
         controller.enabled = true;
     }
 
+    /// <summary>
+    /// Server RPC: 設置重生點
+    /// </summary>
+    [ServerRpc]
+    public void SetSpawnPointServerRpc(Vector3 position)
+    {
+        SetSpawnPointClientRpc(position, new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams
+            {
+                TargetClientIds = new ulong[] { OwnerClientId }
+            }
+        });
+    }
+
+    /// <summary>
+    /// Client RPC: 接收重生點設置
+    /// </summary>
     [ClientRpc]
     public void SetSpawnPointClientRpc(Vector3 position, ClientRpcParams rpcParams = default)
     {
         if (!IsOwner) return;
+
         spawnPoint = position;
+        isSpawnPointReady = true;
+        Debug.Log($"[Respawn] 收到重生點設置: {position}");
+    }
+
+    /// <summary>
+    /// 手動觸發重生（調試用）
+    /// </summary>
+    public void ManualRespawn()
+    {
+        if (!IsOwner || !isSpawnPointReady) return;
+        DoRespawn();
+    }
+
+    /// <summary>
+    /// 檢查重生點是否已就緒
+    /// </summary>
+    public bool IsSpawnPointReady()
+    {
+        return isSpawnPointReady;
+    }
+
+    /// <summary>
+    /// 獲取當前重生點位置
+    /// </summary>
+    public Vector3 GetSpawnPoint()
+    {
+        return spawnPoint;
     }
 }

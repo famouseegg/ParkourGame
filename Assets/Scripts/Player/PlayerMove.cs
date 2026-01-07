@@ -1,95 +1,96 @@
 using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using Unity.Netcode.Components;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
+
+/// <summary>
+/// 玩家移動控制器 - 處理角色移動、跳躍、俯衝和攻擊
+/// 支持地面和空中的物理交互
+/// </summary>
 public class PlayerMove : NetworkBehaviour
 {
-    /* ========== 外部可調整參數 ========== */
-    [Header("Movement Settings")]
-    [SerializeField] private float MoveSpeed = 8.0f;
-    [SerializeField] private float SprintSpeed = 12f;
+    #region 序列化欄位
+
+    [Header("移動設置")]
+    [SerializeField] private float moveSpeed = 8.0f;
+    [SerializeField] private float sprintSpeed = 12f;
     [SerializeField] private float accelTime = 0.1f;        // 地面加速
     [SerializeField] private float decelTime = 0.02f;       // 地面煞車
     [SerializeField] private float airAccelTime = 0.15f;    // 空中加速
     [SerializeField] private float airDecelTime = 0.5f;     // 空中慣性
-    [SerializeField] private float RotationSmoothTime = 0.12f; // 旋轉平滑時間
+    [SerializeField] private float rotationSmoothTime = 0.12f;
 
-    [Header("Jump / Gravity / Knockback")]
-    [SerializeField] private float JumpHeight = 3.0f;
-    [SerializeField] private float JumpTimeout = 0.10f;
-    [SerializeField] private float Gravity = -15.0f;
-    [SerializeField] private float Damping = 6f;
-    [SerializeField] private float terminalVelocity = 53.0f; // 最大落速
+    [Header("跳躍 / 重力 / 擊退")]
+    [SerializeField] private float jumpHeight = 3.0f;
+    [SerializeField] private float jumpTimeout = 0.10f;
+    [SerializeField] private float gravity = -15.0f;
+    [SerializeField] private float damping = 6f;
+    [SerializeField] private float terminalVelocity = 53.0f;
 
-    [Header("Ground Check")]
-    [SerializeField] private LayerMask GroundLayers;
-    [SerializeField] private float GroundedRadius = 0.28f;
-    [SerializeField] private float GroundedOffset = -0.14f;
+    [Header("地面檢測")]
+    [SerializeField] private LayerMask groundLayers;
+    [SerializeField] private float groundedRadius = 0.28f;
+    [SerializeField] private float groundedOffset = -0.14f;
 
-    [Header("Dive")]
+    [Header("俯衝")]
     [SerializeField] private NetworkAnimator diveAnim;
     [SerializeField] private float diveSpeed = 15f;
     [SerializeField] private float diveDuration = 0.3f;
     [SerializeField] private float diveCooldown = 0.5f;
 
-    [Header("Attack")]
+    [Header("攻擊")]
     [SerializeField] private NetworkAnimator attackAnim;
     [SerializeField] private float attackDuration = 0.2f;
     [SerializeField] private float attackCooldown = 0.5f;
 
-    /* ========== 內部狀態變數 ========== */
+    #endregion
+
+    #region 私有變數
+
     // 組件引用
     private CharacterController controller;
     private StarterAssetsInputs input;
     private GameObject mainCamera;
 
-    // 移動數值追蹤
+    // 移動狀態
     private float speed;
-    private float speedVelocity;    // SmoothDamp 使用
+    private float speedVelocity;
     private float verticalVelocity;
     private float targetRotation = 0.0f;
-    private float rotationVelocity; // SmoothDampAngle 使用
+    private float rotationVelocity;
 
-    // 狀態計時器與標記
-    private bool Grounded = true;
+    // 地面狀態
+    private bool grounded = true;
     private float jumpTimeoutDelta;
 
+    // 俯衝狀態
     private bool isDiving = false;
     private bool canAirDive = true;
     private Vector3 currentDiveDir;
     private float diveDurationTimer;
     private float diveCooldownTimer;
 
+    // 攻擊狀態
     private bool isAttacking = false;
     private float attackDurationTimer;
     private float attackCooldownTimer;
 
+    // 擊退狀態
     private bool isKnockback;
     private Vector3 externalVelocity;
 
-    // 移動平台相關
+    // 移動平台
     private Transform currentPlatform = null;
     private Vector3 lastPlatformPosition;
     private Vector3 platformDelta;
 
+    #endregion
+
+    #region Unity 生命週期
+
     private void Start()
     {
-        // 只有一個Camara時適用
-        if (Camera.main != null)
-            mainCamera = Camera.main.gameObject;
-        else
-            Debug.LogError("場景缺少 Camera.main");
-
-        if (controller == null)
-            controller = GetComponent<CharacterController>();
-
-        if (input == null)
-            input = GetComponent<StarterAssetsInputs>();
-
-        jumpTimeoutDelta = JumpTimeout;
-        GroundedOffset = (controller.height / 2f) + controller.center.y;
+        InitializeComponents();
     }
 
     private void Update()
@@ -106,37 +107,86 @@ public class PlayerMove : NetworkBehaviour
     private void LateUpdate()
     {
         if (!IsOwner || currentPlatform == null) return;
+        HandleMovingPlatform();
+    }
 
-        // 計算位移
-        Vector3 currentPlatformPos = currentPlatform.position;
-        platformDelta = currentPlatformPos - lastPlatformPosition;
+    #endregion
 
-        // 只有在有位移時才移動
-        if (platformDelta.sqrMagnitude > 0)
+    #region 初始化
+
+    private void InitializeComponents()
+    {
+        StartCoroutine(WaitForMainCameraAndAssign());
+
+        if (controller == null)
+            controller = GetComponent<CharacterController>();
+
+        if (input == null)
+            input = GetComponent<StarterAssetsInputs>();
+
+        jumpTimeoutDelta = jumpTimeout;
+        groundedOffset = (controller.height / 2f) + controller.center.y;
+    }
+
+    private System.Collections.IEnumerator WaitForMainCameraAndAssign()
+    {
+        float timeout = 3f;
+        float timer = 0f;
+
+        while (mainCamera == null && timer < timeout)
         {
-            controller.Move(platformDelta);
+            // 尋找有 MainCamera tag 的物件
+            GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");
+            if (cam != null && cam.GetComponent<Camera>() != null)
+            {
+                mainCamera = cam;
+                break;
+            }
+
+            yield return null;
+            timer += Time.unscaledDeltaTime;
         }
 
-        // 更新紀錄
-        lastPlatformPosition = currentPlatformPos;
+        if (mainCamera == null)
+        {
+            Debug.LogWarning("[PlayerMove] 初始化時未找到攝影機，將在移動時自動查找");
+        }
     }
+
+    #endregion
+
+    #region 地面檢測
 
     private void GroundedCheck()
     {
-        // 在腳色底下設置一個球體檢測玩家是否在地板上
-        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-        Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+        // 檢查腳下是否有地面
+        Vector3 spherePosition = new Vector3(
+            transform.position.x,
+            transform.position.y - groundedOffset,
+            transform.position.z
+        );
+        grounded = Physics.CheckSphere(spherePosition, groundedRadius, groundLayers, QueryTriggerInteraction.Ignore);
 
+        // 檢測移動平台
+        DetectMovingPlatform();
+    }
+
+    private void DetectMovingPlatform()
+    {
         RaycastHit hit;
-        // 使用 SphereCast 偵測腳下
-        if (Physics.SphereCast(transform.position, GroundedRadius, Vector3.down, out hit, GroundedOffset + 0.5f, GroundLayers, QueryTriggerInteraction.Ignore))
+        if (Physics.SphereCast(
+            transform.position,
+            groundedRadius,
+            Vector3.down,
+            out hit,
+            groundedOffset + 0.5f,
+            groundLayers,
+            QueryTriggerInteraction.Ignore))
         {
-            // 找到移動腳本
             var movingPlatform = hit.collider.GetComponentInParent<MovingPlatform>();
 
             if (movingPlatform != null)
             {
-                // 鎖定腳本中指定的會動的 platformParent
                 Transform actualMovingTransform = movingPlatform.GetPlatformTransform();
 
                 if (currentPlatform != actualMovingTransform)
@@ -147,96 +197,172 @@ public class PlayerMove : NetworkBehaviour
             }
             else
             {
-                // 離開移動平台
                 currentPlatform = null;
             }
         }
         else
         {
-            // 離開地面檢測範圍
             currentPlatform = null;
         }
     }
 
+    private void HandleMovingPlatform()
+    {
+        Vector3 currentPlatformPos = currentPlatform.position;
+        platformDelta = currentPlatformPos - lastPlatformPosition;
+
+        if (platformDelta.sqrMagnitude > 0)
+        {
+            controller.Move(platformDelta);
+        }
+
+        lastPlatformPosition = currentPlatformPos;
+    }
+
+    #endregion
+
+    #region 移動
+
     private void Move()
     {
+        // 確保攝影機引用有效
+        if (mainCamera == null)
+        {
+            mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        }
+
+        // 處理擊退
         if (isKnockback)
         {
-            controller.Move(externalVelocity * Time.deltaTime + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
-
-            // 水平擊退逐漸衰減
-            externalVelocity = Vector3.Lerp(
-                externalVelocity,
-                Vector3.zero,
-                Time.deltaTime * Damping
-            );
-
-            // 接近 0 時結束擊退
-            if (externalVelocity.magnitude < 0.1f)
-            {
-                externalVelocity = Vector3.zero;
-                isKnockback = false;
-            }
-
-            // 擊退時無法移動    
+            HandleKnockback();
             return;
         }
 
-        if (input.sprint) { Debug.Log("Sprint Triggered"); }
-        float targetSpeed = input.sprint ? SprintSpeed : MoveSpeed;
+        // 計算目標速度
+        float targetSpeed = input.sprint ? sprintSpeed : moveSpeed;
+        if (input.move == Vector2.zero)
+            targetSpeed = 0.0f;
 
-        if (input.move == Vector2.zero) targetSpeed = 0.0f;
-
+        // 更新速度
         if (!isDiving)
         {
-            // 地面急停
-            if (Grounded && targetSpeed < 0.01f && speed < 0.5f)
-            {
-                speed = 0f;
-                speedVelocity = 0f; // 清空慣性
-            }
-            else
-            {
-                float targetSmoothTime = (targetSpeed > speed)
-                ? (Grounded ? accelTime : airAccelTime)
-                : (Grounded ? decelTime : airDecelTime);
-
-                speed = Mathf.SmoothDamp(speed, targetSpeed, ref speedVelocity, targetSmoothTime);
-            }
+            UpdateSpeed(targetSpeed);
         }
 
-        // 把vector2 輸入轉為 vector3
+        // 計算移動方向
         Vector3 inputDirection = new Vector3(input.move.x, 0.0f, input.move.y).normalized;
-        // 避免抖動
+
+        // 旋轉角色
         if (input.move != Vector2.zero)
         {
-            if (mainCamera == null)
-            {
-                Debug.LogError("PlayerMove: mainCamera is null; cannot rotate player.");
-                return;
-            }
-            targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                                mainCamera.transform.eulerAngles.y;
-            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
-                                RotationSmoothTime);
-
-            // 旋轉以面向輸入方向（相對於攝影機位置）
-            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            RotateCharacter(inputDirection);
         }
 
-        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-        Vector3 playerMotion = (targetDirection * speed + new Vector3(0, verticalVelocity, 0)) * Time.deltaTime;
-
-        // move the player
+        // 執行移動
         if (!isDiving)
         {
+            Vector3 targetDirection = transform.forward;
+            Vector3 playerMotion = (targetDirection * speed + new Vector3(0, verticalVelocity, 0)) * Time.deltaTime;
             controller.Move(playerMotion);
         }
     }
 
+    private void HandleKnockback()
+    {
+        controller.Move(externalVelocity * Time.deltaTime + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+
+        // 水平擊退逐漸衰減
+        externalVelocity = Vector3.Lerp(externalVelocity, Vector3.zero, Time.deltaTime * damping);
+
+        // 接近 0 時結束擊退
+        if (externalVelocity.magnitude < 0.1f)
+        {
+            externalVelocity = Vector3.zero;
+            isKnockback = false;
+        }
+    }
+
+    private void UpdateSpeed(float targetSpeed)
+    {
+        // 地面急停
+        if (grounded && targetSpeed < 0.01f && speed < 0.5f)
+        {
+            speed = 0f;
+            speedVelocity = 0f;
+        }
+        else
+        {
+            float targetSmoothTime = (targetSpeed > speed)
+                ? (grounded ? accelTime : airAccelTime)
+                : (grounded ? decelTime : airDecelTime);
+
+            speed = Mathf.SmoothDamp(speed, targetSpeed, ref speedVelocity, targetSmoothTime);
+        }
+    }
+
+    private void RotateCharacter(Vector3 inputDirection)
+    {
+        if (mainCamera == null) return;
+
+        targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+                         mainCamera.transform.eulerAngles.y;
+        float rotation = Mathf.SmoothDampAngle(
+            transform.eulerAngles.y,
+            targetRotation,
+            ref rotationVelocity,
+            rotationSmoothTime
+        );
+        transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+    }
+
+    #endregion
+
+    #region 跳躍與重力
+
+    private void JumpAndGravity()
+    {
+        if (grounded)
+        {
+            // 防止垂直速度無限累積
+            if (verticalVelocity < 0.0f)
+            {
+                verticalVelocity = -2f; // 保持一點向下速度確保穩定貼地
+            }
+
+            // 執行跳躍
+            if (input.jump && jumpTimeoutDelta <= 0.0f)
+            {
+                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+
+            // 跳躍冷卻
+            if (jumpTimeoutDelta >= 0.0f)
+            {
+                jumpTimeoutDelta -= Time.deltaTime;
+            }
+        }
+        else
+        {
+            // 防止兔子跳
+            jumpTimeoutDelta = jumpTimeout;
+            input.jump = false;
+        }
+
+        // 應用重力
+        if (verticalVelocity < terminalVelocity)
+        {
+            verticalVelocity += gravity * Time.deltaTime;
+        }
+    }
+
+    #endregion
+
+    #region 俯衝
+
     private void Dive()
     {
-        if (Grounded) canAirDive = true;
+        if (grounded)
+            canAirDive = true;
 
         diveDurationTimer -= Time.deltaTime;
         diveCooldownTimer -= Time.deltaTime;
@@ -245,29 +371,36 @@ public class PlayerMove : NetworkBehaviour
 
         if (!input.dive || isDiving) return;
 
+        // 檢查冷卻
         if (diveCooldownTimer > 0)
         {
             input.dive = false;
             return;
         }
 
-        if (Grounded || canAirDive)
+        // 執行俯衝
+        if (grounded || canAirDive)
         {
-            if (!Grounded) canAirDive = false;
+            if (!grounded)
+                canAirDive = false;
 
-            isDiving = true;
-            diveDurationTimer = diveDuration;
-            diveCooldownTimer = diveCooldown;
-            currentDiveDir = transform.forward;
-
-            if (diveAnim != null)
-            {
-                if (!IsOwner) return;
-
-                diveAnim.SetTrigger("isDive");
-            }
+            StartDive();
         }
+
         input.dive = false;
+    }
+
+    private void StartDive()
+    {
+        isDiving = true;
+        diveDurationTimer = diveDuration;
+        diveCooldownTimer = diveCooldown;
+        currentDiveDir = transform.forward;
+
+        if (diveAnim != null && IsOwner)
+        {
+            diveAnim.SetTrigger("isDive");
+        }
     }
 
     private void HandleDiveMovement()
@@ -279,8 +412,15 @@ public class PlayerMove : NetworkBehaviour
 
         controller.Move(currentDiveDir * diveSpeed * Time.deltaTime);
 
-        if (diveDurationTimer <= 0f) { isDiving = false; }
+        if (diveDurationTimer <= 0f)
+        {
+            isDiving = false;
+        }
     }
+
+    #endregion
+
+    #region 攻擊
 
     private void Attack()
     {
@@ -294,69 +434,74 @@ public class PlayerMove : NetworkBehaviour
 
         if (input.attack && !isAttacking)
         {
+            // 檢查冷卻
             if (attackCooldownTimer > 0)
             {
                 input.attack = false;
                 return;
             }
 
-            // 啟動攻擊
-            isAttacking = true;
-            attackDurationTimer = attackDuration;
-            attackCooldownTimer = attackCooldown;
-
-            if (attackAnim != null)
-            {
-                if (!IsOwner) return;
-
-                attackAnim.SetTrigger("isAttack");
-            }
+            // 執行攻擊
+            StartAttack();
         }
+
         input.attack = false;
     }
 
-    private void JumpAndGravity()
+    private void StartAttack()
     {
-        if (Grounded)
+        isAttacking = true;
+        attackDurationTimer = attackDuration;
+        attackCooldownTimer = attackCooldown;
+
+        if (attackAnim != null && IsOwner)
         {
-
-            // 防止垂直速度無限累積
-            if (verticalVelocity < 0.0f)
-            {
-                // 留一點向下速度，確保角色：穩定貼在地面、CharacterController 能正確判斷 Grounded
-                verticalVelocity = -2f;
-            }
-
-            // 玩家有按跳躍鍵 & 跳躍冷卻時間已結束
-            if (input.jump && jumpTimeoutDelta <= 0.0f)
-            {
-                // 下落速度攻式 v = sqrt(h*-2*g) 
-                verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-            }
-
-            // jump timeout
-            if (jumpTimeoutDelta >= 0.0f)
-            {
-                jumpTimeoutDelta -= Time.deltaTime;
-            }
-        }
-        else
-        {
-            // 防止兔子跳
-            jumpTimeoutDelta = JumpTimeout;
-
-            // 防止「按住跳躍鍵」不放
-            input.jump = false;
-        }
-
-        // 在最大掉落速度到達之前 會呈線性加速
-        if (verticalVelocity < terminalVelocity)
-        {
-            verticalVelocity += Gravity * Time.deltaTime;
+            attackAnim.SetTrigger("isAttack");
         }
     }
 
-    // 繪製碰撞體
+    #endregion
+
+    #region 公開方法
+
+    /// <summary>
+    /// 彈射（跳板使用）
+    /// </summary>
+    public void Launch(float launchVelocity)
+    {
+        verticalVelocity = launchVelocity;
+        jumpTimeoutDelta = jumpTimeout;
+    }
+
+    /// <summary>
+    /// 應用擊退力
+    /// </summary>
+    [ClientRpc]
+    public void ApplyKnockbackClientRpc(Vector3 force)
+    {
+        if (!IsOwner) return;
+
+        externalVelocity = force;
+        isKnockback = true;
+        Launch(force.y);
+    }
+
+    /// <summary>
+    /// 調整減速時間
+    /// </summary>
+    [ClientRpc]
+    public void AdjustDecelTimeClientRpc(float adjustment, ClientRpcParams rpcParams = default)
+    {
+        if (!IsOwner) return;
+
+        decelTime = Mathf.Max(0.01f, decelTime + adjustment);
+        Debug.Log($"[PlayerMove] 目前的減速時間: {decelTime}");
+    }
+
+    #endregion
+
+    #region 調試
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
@@ -367,35 +512,9 @@ public class PlayerMove : NetworkBehaviour
                 transform.position.y - (controller.height / 2f) + controller.center.y,
                 transform.position.z
             );
-            Gizmos.DrawWireSphere(spherePosition, GroundedRadius);
+            Gizmos.DrawWireSphere(spherePosition, groundedRadius);
         }
     }
 
-    public void Launch(float launchVelocity)
-    {
-        // 向上的初速
-        verticalVelocity = launchVelocity;
-
-        // 重置跳躍冷卻，避免跳板後馬上被判定 grounded
-        jumpTimeoutDelta = JumpTimeout;
-    }
-
-    [ClientRpc]
-    public void ApplyKnockbackClientRpc(Vector3 force)
-    {
-        if (!IsOwner) return;
-        externalVelocity = force;
-        isKnockback = true;
-
-        // 垂直擊飛
-        Launch(force.y);
-    }
-
-    [ClientRpc]
-    public void AdjustDecelTimeClientRpc(float adjustment, ClientRpcParams rpcParams = default)
-    {
-        if (!IsOwner) return;
-        decelTime = Mathf.Max(0.01f, decelTime + adjustment);
-        Debug.Log("目前的減速時間: " + decelTime);
-    }
+    #endregion
 }

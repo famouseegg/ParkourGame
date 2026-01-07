@@ -1,113 +1,204 @@
 using UnityEngine;
 using Unity.Cinemachine;
 
+/// <summary>
+/// 攝影機控制器 - 處理攝影機旋轉和縮放
+/// </summary>
 public class CameraController : MonoBehaviour
 {
+    [Header("組件引用")]
     [SerializeField] private CinemachineCamera virtualCamera;
-    [SerializeField] private GameObject CinemachineCameraTarget;
+    [SerializeField] private GameObject cinemachineCameraTarget;
 
-    /* ========== 攝影機參數 ========== */
-    // 攝影機角度補正
-    [SerializeField] private float CameraAngleOverride = 0.0f;
-    // 攝影機縮放參數
+    [Header("攝影機設置")]
+    [SerializeField] private float cameraAngleOverride = 0.0f;
+    [SerializeField] private bool lockCameraPosition = false;
+
+    [Header("視角限制")]
+    [SerializeField] private float topClamp = 70.0f;
+    [SerializeField] private float bottomClamp = -30.0f;
+
+    [Header("縮放參數")]
     [SerializeField] private float minFOV = 40.0f;
     [SerializeField] private float maxFOV = 70.0f;
     [SerializeField] private float zoomSmoothTime = 0.1f;
     [SerializeField] private float zoomSpeed = 2.0f;
-    // 視角最高最低限制
-    [SerializeField] private float TopClamp = 70.0f;
-    [SerializeField] private float BottomClamp = -30.0f;
-    // 攝影機垂直旋轉限制
-    [SerializeField] private bool LockCameraPosition = false;
-    // 輸入來源
-    [SerializeField] private StarterAssetsInputs input;
 
-    // 水平方向旋轉角（左右轉）
+    // 內部狀態
+    private StarterAssetsInputs input;
     private float cinemachineTargetPitch;
-    // 垂直方向旋轉角（上下看）
     private float cinemachineTargetYaw;
-    // 縮放視野
     private float targetFOV = 60.0f;
     private float zoomVelocity = 0.0f;
-    // 閥值
-    private const float THRESHOLD = 0.01f;
+    private bool isInitialized = false;
+
+    private const float INPUT_THRESHOLD = 0.01f;
 
     private void Start()
     {
-        // 若未指定目標則尋找子物件 CameraTarget
-        if (CinemachineCameraTarget == null)
+        StartCoroutine(WaitForCameraAndInit());
+    }
+
+    private System.Collections.IEnumerator WaitForCameraAndInit()
+    {
+        float timeout = 3f;
+        float timer = 0f;
+
+        // 等待所有組件就緒
+        while ((!virtualCamera || !cinemachineCameraTarget) && timer < timeout)
         {
-            Transform found = transform.Find("CameraTarget");
-            if (found != null)
-                CinemachineCameraTarget = found.gameObject;
-            else
+            if (!virtualCamera)
             {
-                Debug.LogError("找不到 CameraTarget 子物件！");
-                return;
+                virtualCamera = FindAnyObjectByType<CinemachineCamera>();
             }
+
+            if (!cinemachineCameraTarget)
+            {
+                Transform found = transform.Find("CameraTarget");
+                if (found != null)
+                {
+                    cinemachineCameraTarget = found.gameObject;
+                }
+            }
+
+            if (virtualCamera && cinemachineCameraTarget)
+                break;
+
+            yield return null;
+            timer += Time.unscaledDeltaTime;
         }
-        if (virtualCamera == null)
+
+        // 驗證組件
+        if (!virtualCamera)
         {
-            virtualCamera = FindAnyObjectByType<CinemachineCamera>();
-            if (virtualCamera == null)
-            {
-                Debug.LogError("找不到 CinemachineCamera 元件！");
-                return;
-            }
+            Debug.LogError("[CameraController] 找不到 CinemachineCamera 元件！");
+            yield break;
         }
-        // 初始化旋轉角度
-        cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-        cinemachineTargetPitch = CinemachineCameraTarget.transform.rotation.eulerAngles.x;
-        if (input == null)
+
+        if (!cinemachineCameraTarget)
+        {
+            Debug.LogError("[CameraController] 找不到 CameraTarget 子物件！");
+            yield break;
+        }
+
+        // 初始化
+        InitializeCamera();
+    }
+
+    private void InitializeCamera()
+    {
+        // 設置初始旋轉角度
+        cinemachineTargetYaw = cinemachineCameraTarget.transform.rotation.eulerAngles.y;
+        cinemachineTargetPitch = cinemachineCameraTarget.transform.rotation.eulerAngles.x;
+
+        // 取得輸入組件
+        if (!input)
+        {
             input = GetComponent<StarterAssetsInputs>();
-        if (virtualCamera != null)
+        }
+
+        // 設置初始 FOV
+        if (virtualCamera)
         {
             targetFOV = virtualCamera.Lens.FieldOfView;
         }
+
+        isInitialized = true;
+        Debug.Log("[CameraController] 攝影機初始化完成");
     }
 
     private void LateUpdate()
     {
+        if (!isInitialized || !cinemachineCameraTarget) return;
+
         CameraRotation();
         CameraZoom();
     }
 
     private void CameraRotation()
     {
-        //如果有輸入(設定閥值避免抖動) & 相機未鎖定
-        if (input != null && input.look.sqrMagnitude >= THRESHOLD && !LockCameraPosition)
+        // 檢查是否有輸入且相機未鎖定
+        if (input && input.look.sqrMagnitude >= INPUT_THRESHOLD && !lockCameraPosition)
         {
             cinemachineTargetYaw += input.look.x;
             cinemachineTargetPitch += -input.look.y;
         }
-        //限制旋轉角度在 360 度以內。
+
+        // 限制旋轉角度
         cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
-        cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, BottomClamp, TopClamp);
-        // Cinemachine 將跟著這一目標物體的旋轉
-        CinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + CameraAngleOverride, cinemachineTargetYaw, 0.0f);
+        cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, bottomClamp, topClamp);
+
+        // 應用旋轉
+        if (cinemachineCameraTarget)
+        {
+            cinemachineCameraTarget.transform.rotation = Quaternion.Euler(
+                cinemachineTargetPitch + cameraAngleOverride,
+                cinemachineTargetYaw,
+                0.0f
+            );
+        }
     }
 
     private void CameraZoom()
     {
-        if (input != null && Mathf.Abs(input.zoom) > 0.01f && virtualCamera != null)
+        if (!virtualCamera) return;
+
+        // 處理縮放輸入
+        if (input && Mathf.Abs(input.zoom) > INPUT_THRESHOLD)
         {
             targetFOV -= input.zoom * zoomSpeed;
             targetFOV = Mathf.Clamp(targetFOV, minFOV, maxFOV);
         }
-        if (virtualCamera != null)
-        {
-            virtualCamera.Lens.FieldOfView = Mathf.SmoothDamp(
-                virtualCamera.Lens.FieldOfView,
-                targetFOV,
-                ref zoomVelocity,
-                zoomSmoothTime);
-        }
+
+        // 平滑應用 FOV
+        virtualCamera.Lens.FieldOfView = Mathf.SmoothDamp(
+            virtualCamera.Lens.FieldOfView,
+            targetFOV,
+            ref zoomVelocity,
+            zoomSmoothTime
+        );
     }
 
-    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+    private static float ClampAngle(float angle, float min, float max)
     {
-        if (lfAngle < -360f) lfAngle += 360f;
-        if (lfAngle > 360f) lfAngle -= 360f;
-        return Mathf.Clamp(lfAngle, lfMin, lfMax);
+        if (angle < -360f) angle += 360f;
+        if (angle > 360f) angle -= 360f;
+        return Mathf.Clamp(angle, min, max);
+    }
+
+    /// <summary>
+    /// 重置攝影機視角
+    /// </summary>
+    public void ResetCameraRotation()
+    {
+        if (!cinemachineCameraTarget) return;
+
+        cinemachineTargetYaw = 0f;
+        cinemachineTargetPitch = 0f;
+        cinemachineCameraTarget.transform.rotation = Quaternion.identity;
+    }
+
+    /// <summary>
+    /// 重置縮放
+    /// </summary>
+    public void ResetZoom()
+    {
+        targetFOV = 60.0f;
+    }
+
+    /// <summary>
+    /// 設置相機鎖定狀態
+    /// </summary>
+    public void SetCameraLock(bool locked)
+    {
+        lockCameraPosition = locked;
+    }
+
+    /// <summary>
+    /// 檢查是否已初始化
+    /// </summary>
+    public bool IsInitialized()
+    {
+        return isInitialized;
     }
 }

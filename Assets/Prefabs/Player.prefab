@@ -117,6 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d00e4791bb919eb45ae5127c0a393514, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LookAtCamara
+  invertDirection: 0
 --- !u!114 &9170689438034667962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,7 +220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1253956205
+  GlobalObjectIdHash: 946521734
   InScenePlacedSourceGlobalObjectIdHash: 1253956205
   DeferredDespawnTick: 0
   Ownership: 1
@@ -245,23 +246,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMove
   ShowTopMostFoldoutHeaderGroup: 1
-  MoveSpeed: 8
-  SprintSpeed: 12
+  moveSpeed: 8
+  sprintSpeed: 12
   accelTime: 0.1
   decelTime: 0.02
   airAccelTime: 0.15
   airDecelTime: 0.5
-  RotationSmoothTime: 0.12
-  JumpHeight: 3
-  JumpTimeout: 0.1
-  Gravity: -15
-  Damping: 6
+  rotationSmoothTime: 0.12
+  jumpHeight: 3
+  jumpTimeout: 0.1
+  gravity: -15
+  damping: 6
   terminalVelocity: 53
-  GroundLayers:
+  groundLayers:
     serializedVersion: 2
     m_Bits: 64
-  GroundedRadius: 0.28
-  GroundedOffset: -0.14
+  groundedRadius: 0.28
+  groundedOffset: -0.14
   diveAnim: {fileID: 1633138157031680451}
   diveSpeed: 15
   diveDuration: 0.3
@@ -513,16 +514,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
   virtualCamera: {fileID: 0}
-  CinemachineCameraTarget: {fileID: 0}
-  CameraAngleOverride: 0
+  cinemachineCameraTarget: {fileID: 0}
+  cameraAngleOverride: 0
+  lockCameraPosition: 0
+  topClamp: 70
+  bottomClamp: -30
   minFOV: 40
   maxFOV: 70
   zoomSmoothTime: 0.1
   zoomSpeed: 2
-  TopClamp: 70
-  BottomClamp: -30
-  LockCameraPosition: 0
-  input: {fileID: 0}
 --- !u!1 &3381379925562085062
 GameObject:
   m_ObjectHideFlags: 0

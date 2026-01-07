@@ -27,8 +27,18 @@ public class ClientAuthoritativePlayer : NetworkBehaviour
         {
             EnableLocalPlayer();
 
-            // 把 Lobby 的名字送給 Server
-            SetNameServerRpc(LobbyManager.Instance.GetPlayerName());
+            // 安全地從 Lobby 取得名字
+            string nameToSet = "Player";
+            if (LobbyManager.Instance != null)
+            {
+                nameToSet = LobbyManager.Instance.GetPlayerName();
+            }
+            else
+            {
+                Debug.LogWarning("[ClientAuthoritativePlayer] LobbyManager 不存在，使用預設名字");
+            }
+
+            SetNameServerRpc(nameToSet);
         }
         else
         {
