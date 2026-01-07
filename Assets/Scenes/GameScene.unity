@@ -6321,6 +6321,18 @@ PrefabInstance:
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
       value: 3612669217
       objectReference: {fileID: 0}
+    - target: {fileID: 6674214037789504158, guid: 7ef584658b6d5c74eb24b2915b9f27cc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.002
+      objectReference: {fileID: 0}
+    - target: {fileID: 6674214037789504158, guid: 7ef584658b6d5c74eb24b2915b9f27cc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.11
+      objectReference: {fileID: 0}
+    - target: {fileID: 6674214037789504158, guid: 7ef584658b6d5c74eb24b2915b9f27cc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.034
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9767,7 +9779,7 @@ SceneRoots:
   - {fileID: 684545180}
   - {fileID: 3689444521342704723}
   - {fileID: 1783236589}
+  - {fileID: 51536555}
   - {fileID: 1282078588}
   - {fileID: 1080785992}
-  - {fileID: 51536555}
   - {fileID: 1404779716}
