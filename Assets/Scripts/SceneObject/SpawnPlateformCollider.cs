@@ -7,10 +7,11 @@ public class SpawnPlateformCollider : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if((1<<other.gameObject.layer & playerMask) != 0)
+        if (!IsServer) return;
+
+        if ((1 << other.gameObject.layer & playerMask) != 0)
         {
-            
-           var respawn = other.GetComponent<Respawn>();
+            var respawn = other.GetComponent<Respawn>();
             if (respawn == null) return;
 
             respawn.SetSpawnPointClientRpc(
