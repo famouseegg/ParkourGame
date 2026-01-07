@@ -2,7 +2,7 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-public class RotatingBarPushCollider : NetworkBehaviour
+public class PushCollider : NetworkBehaviour
 {
     [SerializeField] private float pushForce = 24f;
     [SerializeField] private float upwardForce = 6f;
@@ -10,7 +10,7 @@ public class RotatingBarPushCollider : NetworkBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!IsServer) return;
-        if((1<<other.gameObject.layer & playerMask) != 0)
+        if ((1 << other.gameObject.layer & playerMask) != 0)
         {
             PlayerMove player = other.gameObject.GetComponent<PlayerMove>();
             //避免撞到其他物件
@@ -27,6 +27,6 @@ public class RotatingBarPushCollider : NetworkBehaviour
 
             player.ApplyKnockbackClientRpc(force);
         }
-        
+
     }
 }

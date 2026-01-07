@@ -1157,14 +1157,20 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1827604999622531133}
+    - targetCorrespondingSourceObject: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 807149189737688865}
   m_SourcePrefab: {fileID: 100100000, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
 --- !u!114 &649411829205728644 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3702001932063635802, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
   m_PrefabInstance: {fileID: 4207219372915688670}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 7677212756100718560}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
@@ -1175,3 +1181,49 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6602887580977676676, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
   m_PrefabInstance: {fileID: 4207219372915688670}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7677212756100718560 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5830468174758484798, guid: 22d4a89f461b64046bcd55ba1668bcd5, type: 3}
+  m_PrefabInstance: {fileID: 4207219372915688670}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &1827604999622531133
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7677212756100718560}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Radius: 0.15
+  m_Height: 0.5
+  m_Direction: 0
+  m_Center: {x: 0, y: 0.53, z: 0}
+--- !u!114 &807149189737688865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7677212756100718560}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e54fe417fbfba747b294b48ec3d382a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotatingBarPushCollider
+  ShowTopMostFoldoutHeaderGroup: 1
+  pushForce: 24
+  upwardForce: 6
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 128
