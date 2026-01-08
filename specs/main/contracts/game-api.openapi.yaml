@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: ParkourGame API
+  version: 1.0.0
+paths:
+  /room/create:
+    post:
+      summary: 建立新房間
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                maxPlayers:
+                  type: integer
+      responses:
+        "200":
+          description: 房間建立成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+  /room/{id}/join:
+    post:
+      summary: 玩家加入房間
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: string
+      responses:
+        "200":
+          description: 加入成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+  /room/{id}/leave:
+    post:
+      summary: 玩家離開房間
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: string
+      responses:
+        "200":
+          description: 離開成功
+  /player/create:
+    post:
+      summary: 建立新玩家
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "200":
+          description: 玩家建立成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+  /player/{id}/score:
+    get:
+      summary: 查詢玩家分數
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 玩家分數
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreRecord"
+  /level/list:
+    get:
+      summary: 取得關卡列表
+      responses:
+        "200":
+          description: 關卡列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Level"
+components:
+  schemas:
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+        status:
+          type: string
+          enum: [等待中, 遊戲中, 結束]
+        maxPlayers:
+          type: integer
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        position:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        velocity:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        score:
+          type: integer
+        isAlive:
+          type: boolean
+    ScoreRecord:
+      type: object
+      properties:
+        playerId:
+          type: string
+        levelId:
+          type: string
+        score:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+    Level:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        obstacles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Obstacle"
+        startPosition:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        endPosition:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+    Obstacle:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        position:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        isActive:
+          type: boolean
