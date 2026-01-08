@@ -45,3 +45,31 @@
 - **滑鼠左鍵**：攻擊
 - **Shift**：衝刺
 - **空白鍵**：跳躍
+
+## 安裝編譯指南
+
+### 原始碼取得
+使用 Git 來複製專案：
+```bash
+git clone https://github.com/famouseegg/ParkourGame.git
+```
+
+### Unity 版本要求
+- **Unity 2022.3 LTS**
+
+### 其他套件依賴
+本專案使用以下套件：
+- **Cinemachine**
+- **Input System**
+- **Netcode for GameObjects**
+- **Unity Transport**
+
+
+## 下載遊戲
+從 GitHub Release 下載最新版本：
+1. 訪問 [Release 頁面](https://github.com/famouseegg/ParkourGame/releases)
+2. 下載最新版本的壓縮檔案
+
+### 執行遊戲
+1. 解壓縮下載的檔案
+2. 點選 `ParkourGame.exe` 即可執行遊戲
