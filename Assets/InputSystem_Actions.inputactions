@@ -52,7 +52,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Dive",
+                    "name": "Lunge",
                     "type": "Button",
                     "id": "2b38e8f1-21e8-4bf0-92db-b0d83fab84f3",
                     "expectedControlType": "",
@@ -320,7 +320,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Dive",
+                    "action": "Lunge",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

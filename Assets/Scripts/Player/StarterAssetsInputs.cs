@@ -7,7 +7,7 @@ public class StarterAssetsInputs : MonoBehaviour
     public bool jump;
     public bool sprint;
     public bool analogMovement;
-    public bool dive;
+    public bool lunge;
     public bool attack;
 
     public float zoom;
@@ -42,14 +42,14 @@ public class StarterAssetsInputs : MonoBehaviour
         ZoomInput(value.Get<float>());
     }
 
-    public void OnDive(InputValue value)
+    public void OnLunge(InputValue value)
     {
-        DiveInput(value.isPressed);
+        LungeInput(value.isPressed);
     }
 
-    public void DiveInput(bool newDiveState)
+    public void LungeInput(bool newLungeState)
     {
-        dive = newDiveState;
+        lunge = newLungeState;
     }
 
     public void OnAttack(InputValue value)
@@ -97,4 +97,3 @@ public class StarterAssetsInputs : MonoBehaviour
         Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
     }
 }
- 

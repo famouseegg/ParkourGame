@@ -69,6 +69,15 @@ public class Respawn : NetworkBehaviour
         Debug.Log($"[Respawn] 重生點已設置: {point}");
     }
 
+    private void Start()
+    {
+        // 延遲到 Start 再檢查，確保場景物件都已初始化
+        if (IsOwner && !isSpawnPointReady)
+        {
+            TryFindSpawnPoint();
+        }
+    }
+
     private void Update()
     {
         if (!IsOwner || !isSpawnPointReady) return;
@@ -77,6 +86,47 @@ public class Respawn : NetworkBehaviour
         if (transform.position.y <= fallThreshold)
         {
             DoRespawn();
+        }
+    }
+
+    private void TryFindSpawnPoint()
+    {
+        // 嘗試查找預設重生點
+        if (DefaulReSpawnPoint.Instance != null)
+        {
+            Vector3 pos = DefaulReSpawnPoint.Instance.GetTransform().position;
+            Debug.Log($"[Respawn] 在 Start 中找到重生點，位置: {pos}");
+            OnSpawnPointReady(pos);
+        }
+        else
+        {
+            // 如果還是找不到，使用 Coroutine 稍後再試
+            StartCoroutine(WaitForSpawnPoint());
+        }
+    }
+
+    private System.Collections.IEnumerator WaitForSpawnPoint()
+    {
+        Debug.Log("[Respawn] 等待重生點初始化...");
+
+        float timeout = 5f;
+        float elapsed = 0f;
+
+        while (DefaulReSpawnPoint.Instance == null && elapsed < timeout)
+        {
+            yield return new WaitForSeconds(0.1f);
+            elapsed += 0.1f;
+        }
+
+        if (DefaulReSpawnPoint.Instance != null)
+        {
+            Vector3 pos = DefaulReSpawnPoint.Instance.GetTransform().position;
+            Debug.Log($"[Respawn] 在 Coroutine 中找到重生點，位置: {pos}");
+            OnSpawnPointReady(pos);
+        }
+        else
+        {
+            Debug.LogError("[Respawn] 超時！無法找到重生點");
         }
     }
 

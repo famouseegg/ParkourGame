@@ -32,11 +32,12 @@ public class PlayerMove : NetworkBehaviour
     [SerializeField] private float groundedRadius = 0.28f;
     [SerializeField] private float groundedOffset = -0.14f;
 
-    [Header("俯衝")]
-    [SerializeField] private NetworkAnimator diveAnim;
-    [SerializeField] private float diveSpeed = 15f;
-    [SerializeField] private float diveDuration = 0.3f;
-    [SerializeField] private float diveCooldown = 0.5f;
+    [Header("飛撲")]
+    [SerializeField] private NetworkAnimator lungeAnim;
+    [SerializeField] private float lungeForwardSpeed = 10f;    // 水平飛撲速度
+    [SerializeField] private float lungeUpwardSpeed = 8f;      // 向上彈射速度
+    [SerializeField] private float lungeDuration = 0.5f;       // 飛撲持續時間
+    [SerializeField] private float lungeCooldown = 1f;       // 飛撲冷卻時間
 
     [Header("攻擊")]
     [SerializeField] private NetworkAnimator attackAnim;
@@ -63,12 +64,12 @@ public class PlayerMove : NetworkBehaviour
     private bool grounded = true;
     private float jumpTimeoutDelta;
 
-    // 俯衝狀態
-    private bool isDiving = false;
-    private bool canAirDive = true;
-    private Vector3 currentDiveDir;
-    private float diveDurationTimer;
-    private float diveCooldownTimer;
+    // 飛撲狀態
+    private bool islungeing = false;
+    private bool canLunge = true;  // 是否可以飛撲
+    private Vector3 currentlungeDir;
+    private float lungeDurationTimer;
+    private float lungeCooldownTimer;
 
     // 攻擊狀態
     private bool isAttacking = false;
@@ -100,7 +101,7 @@ public class PlayerMove : NetworkBehaviour
         JumpAndGravity();
         GroundedCheck();
         Move();
-        Dive();
+        lunge();
         Attack();
     }
 
@@ -244,7 +245,7 @@ public class PlayerMove : NetworkBehaviour
             targetSpeed = 0.0f;
 
         // 更新速度
-        if (!isDiving)
+        if (!islungeing)
         {
             UpdateSpeed(targetSpeed);
         }
@@ -259,7 +260,7 @@ public class PlayerMove : NetworkBehaviour
         }
 
         // 執行移動
-        if (!isDiving)
+        if (!islungeing)
         {
             Vector3 targetDirection = transform.forward;
             Vector3 playerMotion = (targetDirection * speed + new Vector3(0, verticalVelocity, 0)) * Time.deltaTime;
@@ -323,10 +324,14 @@ public class PlayerMove : NetworkBehaviour
     {
         if (grounded)
         {
-            // 防止垂直速度無限累積
-            if (verticalVelocity < 0.0f)
+            // 飛撲時不重置垂直速度
+            if (!islungeing)
             {
-                verticalVelocity = -2f; // 保持一點向下速度確保穩定貼地
+                // 防止垂直速度無限累積
+                if (verticalVelocity < 0.0f)
+                {
+                    verticalVelocity = -2f; // 保持一點向下速度確保穩定貼地
+                }
             }
 
             // 執行跳躍
@@ -357,64 +362,81 @@ public class PlayerMove : NetworkBehaviour
 
     #endregion
 
-    #region 俯衝
+    #region 飛撲
 
-    private void Dive()
+    private void lunge()
     {
-        if (grounded)
-            canAirDive = true;
+        // 著地且不在飛撲時恢復飛撲能力
+        if (grounded && !islungeing)
+        {
+            canLunge = true;
+        }
 
-        diveDurationTimer -= Time.deltaTime;
-        diveCooldownTimer -= Time.deltaTime;
+        lungeDurationTimer -= Time.deltaTime;
+        lungeCooldownTimer -= Time.deltaTime;
 
-        HandleDiveMovement();
+        HandlelungeMovement();
 
-        if (!input.dive || isDiving) return;
+        if (!input.lunge || islungeing) return;
 
         // 檢查冷卻
-        if (diveCooldownTimer > 0)
+        if (lungeCooldownTimer > 0)
         {
-            input.dive = false;
+            input.lunge = false;
             return;
         }
 
-        // 執行俯衝
-        if (grounded || canAirDive)
+        // 檢查是否可以飛撲
+        if (!canLunge)
         {
-            if (!grounded)
-                canAirDive = false;
-
-            StartDive();
+            input.lunge = false;
+            return;
         }
 
-        input.dive = false;
+        // 執行飛撲並消耗飛撲能力
+        canLunge = false;
+        Startlunge();
+
+        input.lunge = false;
     }
 
-    private void StartDive()
+    private void Startlunge()
     {
-        isDiving = true;
-        diveDurationTimer = diveDuration;
-        diveCooldownTimer = diveCooldown;
-        currentDiveDir = transform.forward;
+        islungeing = true;
+        lungeDurationTimer = lungeDuration;
+        lungeCooldownTimer = lungeCooldown;
+        currentlungeDir = transform.forward;
 
-        if (diveAnim != null && IsOwner)
+        // 給予向上的初始速度，形成拋物線
+        verticalVelocity = lungeUpwardSpeed;
+
+        if (lungeAnim != null && IsOwner)
         {
-            diveAnim.SetTrigger("isDive");
+            lungeAnim.SetTrigger("isLunge");
         }
     }
 
-    private void HandleDiveMovement()
+    private void HandlelungeMovement()
     {
-        if (!isDiving) return;
+        if (!islungeing) return;
 
-        speed = diveSpeed;
+        // 水平方向移動（保持飛撲方向）
+        Vector3 horizontalMovement = currentlungeDir * lungeForwardSpeed * Time.deltaTime;
+
+        // 垂直方向受重力影響（形成拋物線）
+        Vector3 verticalMovement = new Vector3(0, verticalVelocity, 0) * Time.deltaTime;
+
+        // 合併水平和垂直移動
+        controller.Move(horizontalMovement + verticalMovement);
+
+        // 更新速度顯示
+        speed = lungeForwardSpeed;
         speedVelocity = 0f;
 
-        controller.Move(currentDiveDir * diveSpeed * Time.deltaTime);
-
-        if (diveDurationTimer <= 0f)
+        // 檢查是否結束飛撲：時間到
+        if (lungeDurationTimer <= 0f)
         {
-            isDiving = false;
+            islungeing = false;
         }
     }
 
