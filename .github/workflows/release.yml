@@ -1,0 +1,93 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: set_tag
+        run: |
+          # 檢查標籤格式 (語意化版本 v1.2.3)
+          if [[ $GITHUB_REF =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$ ]]; then
+            is_release=true
+            tag=${GITHUB_REF#refs/tags/}
+            echo "Release tag format is valid: $tag"
+          else
+            is_release=false
+            # 獲取最新的發布標籤，失敗則預設 v0.0.0
+            tag=$(curl -sX GET "https://api.github.com/repos/${{ github.repository }}/releases/latest" --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | awk '/tag_name/{print $4}' FS='["]')
+            if [[ ! $tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+              tag="v0.0.0"
+            fi
+            tag="$tag-$(date '+%Y%m%d')-$(git rev-parse --short HEAD)"
+          fi
+
+          if [ "$is_release" != "true" ]; then
+            tag="$tag-ci"
+          fi
+
+          # 檢查是否為預發布版本
+          is_prerelease=false
+          if [[ $tag =~ .*alpha.* || $tag =~ .*beta.* || $tag =~ .*rc.* || $tag =~ .*dev.* || $tag =~ .*-ci.* ]]; then
+            is_prerelease=true
+          fi
+
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "is_release=$is_release" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$is_prerelease" >> $GITHUB_OUTPUT
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
+      is_release: ${{ steps.set_tag.outputs.is_release }}
+      is_prerelease: ${{ steps.set_tag.outputs.is_prerelease }}
+
+  changelog:
+    needs: meta
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate Changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: .github/cliff.toml
+          args: --latest --output CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Changelog
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-artifact
+          path: CHANGELOG.md
+
+  release:
+    needs: [meta, changelog]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog-artifact
+          path: .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.meta.outputs.tag }}
+          name: Release ${{ needs.meta.outputs.tag }}
+          body_path: CHANGELOG.md
+          prerelease: ${{ needs.meta.outputs.is_prerelease == 'true' }}
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
