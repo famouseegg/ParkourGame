@@ -1,6 +1,8 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <div align="center">
 
+<img alt="LOGO" src="https://github.com/user-attachments/assets/864f70e5-4441-446f-a49f-aad4b8eb1d12" width="256" height="256">
+
 # 🚀 ParkourGame
 
 一款多人合作、充滿未知與挑戰的太空跑酷遊戲。玩家需在神秘空間中合作突破重重障礙，尋找逃脫的方法。
@@ -44,21 +46,6 @@
 因為停留，
 只會讓你們永遠迷失在這裡。
 
-## 🗂️ 專案結構
-
-- `Assets/Scenes/`：主要遊戲場景
-- `Assets/Scripts/`：遊戲核心腳本（玩家、管理器、UI等）
-- `Assets/Animation/`：動畫資源
-- `Assets/Settings/`：渲染與專案設定
-
-## ️🛠️ 建置與執行步驟
-
-1. 安裝對應版本的 Unity Hub 與 Unity 編輯器（6000.3.2f1）。
-2. 於 Unity Hub 中選擇「打開專案」，路徑指向本專案資料夾。
-3. 開啟專案後，Unity 會自動還原相依套件。
-4. 進入 `Assets/Scenes/`，選擇 `LobbyScene.unity` 或 `01-GameScene.unity` 開始遊戲。
-5. 按下「播放」(Play) 按鈕即可進行測試。
-
 ## 🌟 遊戲特色
 
 - 多人合作與競賽元素
@@ -66,11 +53,7 @@
 - 物理互動與動態障礙
 - 支援快速重生與關卡切換
 
----
-
 ## 🕹️ 操作方式
-
-### 基本移動
 
 - **W / A / S / D**：控制角色移動
 - **滑鼠移動**：轉動視角、調整視線方向
@@ -78,6 +61,52 @@
 - **滑鼠左鍵**：攻擊
 - **Shift**：衝刺
 - **空白鍵**：跳躍
+
+## 🗂️ 專案結構
+
+- `Assets/Scenes/`：主要遊戲場景
+- `Assets/Scripts/`：遊戲核心腳本（玩家、管理器、UI等）
+- `Assets/Animation/`：動畫資源
+- `Assets/Settings/`：渲染與專案設定
+
+## 安裝編譯指南
+
+### 原始碼取得
+
+使用 Git 來複製專案：
+
+```bash
+git clone https://github.com/famouseegg/ParkourGame.git
+```
+
+### ️🛠️ 建置與執行步驟
+
+1. 安裝對應版本的 Unity Hub 與 Unity 編輯器（6000.3.2f1）。
+2. 於 Unity Hub 中選擇「打開專案」，路徑指向本專案資料夾。
+3. 開啟專案後，Unity 會自動還原相依套件。
+4. 進入 `Assets/Scenes/`，選擇 `LobbyScene.unity` 或 `01-GameScene.unity` 開始遊戲。
+5. 按下「播放」(Play) 按鈕即可進行測試。
+
+### 其他套件依賴
+
+本專案使用以下套件：
+
+- **Cinemachine**
+- **Input System**
+- **Netcode for GameObjects**
+- **Unity Transport**
+
+## 下載遊戲
+
+從 GitHub Release 下載最新版本：
+
+1. 訪問 [Release 頁面](https://github.com/famouseegg/ParkourGame/releases)
+2. 下載最新版本的壓縮檔案
+
+### 執行遊戲
+
+1. 解壓縮下載的檔案
+2. 點選 `ParkourGame.exe` 即可執行遊戲
 
 ## 🤝 貢獻指南
 
