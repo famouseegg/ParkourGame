@@ -65,13 +65,13 @@
 ## 🗂️ 專案結構
 
 - `Assets/Scenes/`：主要遊戲場景
-- `Assets/Scripts/`：遊戲核心腳本（玩家、管理器、UI等）
+- `Assets/Scripts/`：遊戲核心腳本（玩家、管理器、UI 等）
 - `Assets/Animation/`：動畫資源
 - `Assets/Settings/`：渲染與專案設定
 
-## 安裝編譯指南
+## 🛠️ 安裝編譯指南
 
-### 原始碼取得
+### 📥 原始碼取得
 
 使用 Git 來複製專案：
 
@@ -79,7 +79,7 @@
 git clone https://github.com/famouseegg/ParkourGame.git
 ```
 
-### ️🛠️ 建置與執行步驟
+### ⚙️ 建置與執行步驟
 
 1. 安裝對應版本的 Unity Hub 與 Unity 編輯器（6000.3.2f1）。
 2. 於 Unity Hub 中選擇「打開專案」，路徑指向本專案資料夾。
@@ -87,7 +87,7 @@ git clone https://github.com/famouseegg/ParkourGame.git
 4. 進入 `Assets/Scenes/`，選擇 `LobbyScene.unity` 或 `01-GameScene.unity` 開始遊戲。
 5. 按下「播放」(Play) 按鈕即可進行測試。
 
-### 其他套件依賴
+### 📦 其他套件依賴
 
 本專案使用以下套件：
 
@@ -96,14 +96,14 @@ git clone https://github.com/famouseegg/ParkourGame.git
 - **Netcode for GameObjects**
 - **Unity Transport**
 
-## 下載遊戲
+## 💾 下載遊戲
 
 從 GitHub Release 下載最新版本：
 
 1. 訪問 [Release 頁面](https://github.com/famouseegg/ParkourGame/releases)
 2. 下載最新版本的壓縮檔案
 
-### 執行遊戲
+### ▶️ 執行遊戲
 
 1. 解壓縮下載的檔案
 2. 點選 `ParkourGame.exe` 即可執行遊戲
@@ -116,12 +116,10 @@ git clone https://github.com/famouseegg/ParkourGame.git
 2. 建立分支 (`feature/your-feature`)
 3. 提交 PR 並詳述修改內容
 
-## 📬 Star 歷史
+## 🏅 貢獻者
 
-<a href="https://www.star-history.com/#famouseegg/ParkourGame&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=famouseegg/ParkourGame&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=famouseegg/ParkourGame&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=famouseegg/ParkourGame&type=Date" />
- </picture>
+感謝所有為 ParkourGame 做出貢獻的開發者們！
+
+<a href="https://github.com/famouseegg/ParkourGame/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=famouseegg/ParkourGame&max=1000" alt="Contributors"/>
 </a>
