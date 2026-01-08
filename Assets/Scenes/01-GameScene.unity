@@ -423,7 +423,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u9000\u51FA\n"
+  m_text: "\u8FD4\u56DE\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 33c8ad7831048d04aa210fbfcd08a129, type: 2}
   m_sharedMaterial: {fileID: -4745726201167764478, guid: 33c8ad7831048d04aa210fbfcd08a129, type: 2}
@@ -1785,7 +1785,7 @@ GameObject:
   - component: {fileID: 733828112}
   - component: {fileID: 733828115}
   m_Layer: 5
-  m_Name: EscButtom
+  m_Name: ReturnLobbyButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1806,10 +1806,10 @@ RectTransform:
   - {fileID: 104009329}
   m_Father: {fileID: 2139463730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -595.6652, y: 276}
-  m_SizeDelta: {x: 70.6695, y: 30}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 65, y: -40}
+  m_SizeDelta: {x: 60, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &733828112
 MonoBehaviour:
@@ -1905,7 +1905,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f84461ed5d6fdbb4ab466568a2b79264, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BackLobby
-  EscButton: {fileID: 733828112}
+  returnLobbyButton: {fileID: 733828112}
 --- !u!1001 &744580310
 PrefabInstance:
   m_ObjectHideFlags: 0

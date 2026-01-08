@@ -13,7 +13,7 @@ public class BackLobby : UIPanel
     private static BackLobby _instance;
 
     [Header("UI 組件")]
-    [SerializeField] private Button EscButton;
+    [SerializeField] private Button returnLobbyButton;
 
     private void Start()
     {
@@ -22,23 +22,23 @@ public class BackLobby : UIPanel
 
     private void InitializeUI()
     {
-        if (EscButton != null)
+        if (returnLobbyButton != null)
         {
-            EscButton.onClick.AddListener(OnStartGameScene01Click);
+            returnLobbyButton.onClick.AddListener(OnStartGameScene01Click);
         }
     }
 
     private void OnStartGameScene01Click()
     {
-        StartGameWithScene("LobbyScene");
+        ReturnToLobby();
     }
 
-    private void StartGameWithScene(string sceneName)
+    private void ReturnToLobby()
     {
-        if (LobbyManager.Instance != null)
+        if (SceneLifecycleManager.Instance != null)
         {
-            LobbyManager.Instance.OnGameStartWithScene(sceneName);
-            Debug.Log($"[BackLobby] 開始遊戲，載入場景: {sceneName}");
+            SceneLifecycleManager.Instance.RequestReturnToLobby();
+            Debug.Log("[BackLobby] 請求返回大廳");
         }
     }
 }

@@ -84,10 +84,11 @@ public class SingleLobbyListTempletUI : MonoBehaviour
             LobbyManager.Instance.OnLobbyJoined -= OnLobbyJoinedSuccess;
         }
 
-        // 切換到玩家列表 UI
-        if (LobbyUIController.Instance != null)
+        // 根據 Host/Client 狀態切換 UI，避免 UI 狀態殘留
+        if (LobbyUIController.Instance != null && LobbyManager.Instance != null)
         {
-            LobbyUIController.Instance.ShowPlayerList(isHost: false);
+            bool isHost = LobbyManager.Instance.IsHost();
+            LobbyUIController.Instance.ShowPlayerList(isHost);
         }
     }
 }

@@ -401,5 +401,6 @@ public class LobbyManager : PersistentSingleton<LobbyManager>
     public void CleanupLobbyState()
     {
         hasJoinedRelay = false;
+        joinedLobby = null; // 回到大廳時清除 joinedLobby
     }
 }
